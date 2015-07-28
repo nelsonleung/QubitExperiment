@@ -81,9 +81,13 @@ class RabiExperiment(Experiment):
     def post_run_analysis(self,rabi_pts,rabi_avg_data):
         print "Analyzing Rabi Data"
         fitdata = fitdecaysin(rabi_pts,rabi_avg_data)
+        excited_signal = np.sign(180-fitdata[2]%360)
+        pulse_type = self.cfg['rabi']['pulse_type']
+        if pulse_type is 'gauss':
+            excited_signal = np.sign(180-fitdata[2]%360)
+            self.cfg['cal']['excited_signal'] = excited_signal
         pi_length = (self.cfg['cal']['excited_signal']*np.sign(fitdata[0])*0.5*np.pi-fitdata[2]*np.pi/180.)/(2*np.pi*fitdata[1])%(1/fitdata[1])
         half_pi_length = (self.cfg['cal']['excited_signal']*np.sign(fitdata[0])*np.pi-fitdata[2]*np.pi/180.)/(2*np.pi*fitdata[1])%(0.5/fitdata[1])
-        pulse_type = self.cfg['rabi']['pulse_type']
         self.cfg['pulse_info'][pulse_type]['rabi_calibrated']=True
         self.cfg['pulse_info'][pulse_type]['pi_length'] = pi_length
         self.cfg['pulse_info'][pulse_type]['half_pi_length'] = half_pi_length
