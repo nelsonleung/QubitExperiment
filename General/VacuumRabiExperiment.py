@@ -1,13 +1,13 @@
-__author__ = 'dave'
+__author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.instruments.awg.StandardPulseSequences import RabiSequence
+from slab.experiments.General.PulseSequences.StandardPulseSequences import RabiSequence
 from numpy import mean, arange
 
 
 class VacuumRabiExperiment(Experiment):
-    def __init__(self, path='', prefix='Rabi', config_file=None, use_cal=False, **kwargs):
+    def __init__(self, path='', prefix='Vacuum Rabi', config_file=None, use_cal=False, **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
         #self.cfg['alazar']['samplesPerRecord'] = self.cfg['readout']['width']

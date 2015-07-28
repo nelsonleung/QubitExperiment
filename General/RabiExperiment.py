@@ -1,8 +1,8 @@
-__author__ = 'dave'
+__author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.instruments.awg.StandardPulseSequences import RabiSequence
+from slab.experiments.General.PulseSequences.StandardPulseSequences import *
 from numpy import mean, arange
 
 
@@ -18,7 +18,7 @@ class RabiExperiment(Experiment):
 
         self.pulse_sequence = RabiSequence(self.cfg['awgs'], self.cfg['rabi'], self.cfg['readout'])
         self.pulse_sequence.build_sequence()
-        self.pulse_sequence.write_sequence(os.path.join(self.path, 'sequences/'), prefix, upload=True)
+        self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
         self.rabi_pts = self.pulse_sequence.rabi_pts
         #self.cfg['alazar']['samplesPerRecord'] = self.cfg['readout']['width']

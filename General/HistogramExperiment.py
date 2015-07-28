@@ -2,7 +2,7 @@ __author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.instruments.awg.StandardPulseSequences import HistogramSequence
+from slab.experiments.General.PulseSequences.StandardPulseSequences import HistogramSequence
 from numpy import *
 
 
@@ -27,7 +27,7 @@ class HistogramExperiment(Experiment):
 
         self.pulse_sequence = HistogramSequence(self.cfg['awgs'], self.cfg['histo'], self.cfg['readout'],self.cfg['pulse_info'][self.pulse_type])
         self.pulse_sequence.build_sequence()
-        self.pulse_sequence.write_sequence(os.path.join(self.path, 'sequences/'), prefix, upload=True)
+        self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
         self.histo_pts = self.pulse_sequence.histo_pts
         #self.cfg['alazar']['samplesPerRecord'] = self.pulse_sequence.waveform_length

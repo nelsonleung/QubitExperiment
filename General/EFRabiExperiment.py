@@ -27,7 +27,7 @@ class EFRabiExperiment(Experiment):
 
         self.pulse_sequence = EFRabiSequence(self.cfg['awgs'], self.cfg['efrabi'], self.cfg['readout'],self.cfg['pulse_info'][self.pulse_type])
         self.pulse_sequence.build_sequence()
-        self.pulse_sequence.write_sequence(os.path.join(self.path, 'sequences/'), prefix, upload=True)
+        self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
         self.efrabi_pts = self.pulse_sequence.efrabi_pts
         #self.cfg['alazar']['samplesPerRecord'] = self.pulse_sequence.waveform_length

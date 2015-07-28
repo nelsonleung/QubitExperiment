@@ -2,7 +2,7 @@ __author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.instruments.awg.StandardPulseSequences import RamseySequence
+from slab.experiments.General.PulseSequences.StandardPulseSequences import RamseySequence
 from numpy import mean, arange
 
 
@@ -26,7 +26,7 @@ class RamseyExperiment(Experiment):
 
         self.pulse_sequence = RamseySequence(self.cfg['awgs'], self.cfg['ramsey'], self.cfg['readout'],self.cfg['pulse_info'][self.pulse_type])
         self.pulse_sequence.build_sequence()
-        self.pulse_sequence.write_sequence(os.path.join(self.path, 'sequences/'), prefix, upload=True)
+        self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
         self.ramsey_pts = self.pulse_sequence.ramsey_pts
         #self.cfg['alazar']['samplesPerRecord'] = self.pulse_sequence.waveform_length
