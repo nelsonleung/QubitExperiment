@@ -218,26 +218,25 @@ class EFRabiSequence(PulseSequence):
     def reshape_data(self, data):
         return np.reshape(data, (self.sequence_length, self.waveform_length))
 
-class EFProbeSequence(PulseSequence):
-    def __init__(self, awg_info, efprobe_cfg, readout_cfg, pulse_cfg):
+class PulseProbeSequence(PulseSequence):
+    def __init__(self, awg_info, pulse_probe_cfg, readout_cfg, pulse_cfg):
         """
         rabi_cfg = {rabi_pts, sweep_type="time", pulse_type="square", a=0, w=0, sigma=0, freq=0, phase=0}
         readout_cfg = {"Q": 10000, "delay": , "width": , "card_delay": , "card_trig_width":  }
         """
 
-        self.efprobe_cfg=efprobe_cfg
+        self.pulse_probe_cfg=pulse_probe_cfg
 
 
         PulseSequence.__init__(self, "EF Probe", awg_info,sequence_length=1)
 
 
-        self.pulse_type = efprobe_cfg['pulse_type']
-        self.ge_freq = efprobe_cfg['ge_freq']
-        self.ef_freq = efprobe_cfg['ef_freq']
-        self.ge_pi = efprobe_cfg['ge_pi']
-        self.efprobe_len = efprobe_cfg['efprobe_len']
+        self.pulse_type = pulse_probe_cfg['pulse_type']
+        self.ge_freq = pulse_probe_cfg['ge_freq']
+        self.ef_freq = pulse_probe_cfg['ef_freq']
+        self.ge_pi = pulse_probe_cfg['ge_pi']
+        self.pulse_probe_len = pulse_probe_cfg['pulse_probe_len']
         self.a = pulse_cfg['a']
-        self.pi_length = pulse_cfg['pi_length']
         self.freq = pulse_cfg['freq']
         self.fe_sideband_freq = 0
         self.phase = pulse_cfg['phase']
@@ -249,10 +248,10 @@ class EFProbeSequence(PulseSequence):
 
         if self.pulse_type == 'square':
             self.ramp_sigma = pulse_cfg['ramp_sigma']
-            max_pulse_width = self.pi_length + 12 * self.ramp_sigma + self.efprobe_len
+            max_pulse_width =  6 * self.ramp_sigma + self.pulse_probe_len
 
         if self.pulse_type == 'gauss':
-            max_pulse_width = 6*self.pi_length*2 + 6*self.efprobe_len
+            max_pulse_width = 6*self.pulse_probe_len
 
 
         self.max_length = round_samples((max_pulse_width + self.measurement_delay + self.measurement_width+1000))
@@ -274,69 +273,35 @@ class EFProbeSequence(PulseSequence):
                                                       self.origin - self.card_delay + self.measurement_delay,
                                                       self.card_trig_width)
 
-        ef_length = self.efprobe_len
-        w=self.pi_length
+        pulse_probe_len = self.pulse_probe_len
         a=self.a
 
         if self.pulse_type == 'square':
 
-            self.waveforms['qubit drive I'][ii], self.waveforms['qubit drive Q'][ii] = \
-                ap2.sideband(wtpts,
-                             ap2.square(wtpts, a,self.origin - w - 2 * self.ramp_sigma, w, self.ramp_sigma), np.zeros(len(wtpts)),
-                              self.freq, self.phase)
 
-            self.markers['qubit buffer'][ii] = ap2.square(mtpts, 1, self.origin - w - 4 * self.ramp_sigma - 100,
-                                                      w + 4 * self.ramp_sigma + 200)
-
-            self.waveforms['qubit drive I'][ii] += ap2.sideband(wtpts,
-                             ap2.square(wtpts, a,self.origin - ef_length - w - 3*self.ramp_sigma, ef_length, self.ramp_sigma), np.zeros(len(wtpts)),
+            self.waveforms['qubit drive I'][ii] = ap2.sideband(wtpts,
+                             ap2.square(wtpts, a,self.origin - pulse_probe_len - 3*self.ramp_sigma, pulse_probe_len, self.ramp_sigma), np.zeros(len(wtpts)),
                               self.fe_sideband_freq, self.phase)[0]
-            self.waveforms['qubit drive Q'][ii] += ap2.sideband(wtpts,
-                             ap2.square(wtpts, a,self.origin - ef_length - w - 3*self.ramp_sigma, ef_length, self.ramp_sigma), np.zeros(len(wtpts)),
+            self.waveforms['qubit drive Q'][ii] = ap2.sideband(wtpts,
+                             ap2.square(wtpts, a,self.origin - pulse_probe_len - 3*self.ramp_sigma, pulse_probe_len, self.ramp_sigma), np.zeros(len(wtpts)),
                               self.fe_sideband_freq, self.phase)[1]
-            self.markers['qubit buffer'][ii] += ap2.square(mtpts, 1, self.origin - ef_length - w - 4 * self.ramp_sigma- 100 ,
-                                                      ef_length + 4 * self.ramp_sigma+ 200)
+            self.markers['qubit buffer'][ii] = ap2.square(mtpts, 1, self.origin - pulse_probe_len - 3 * self.ramp_sigma- 100 ,
+                                                      pulse_probe_len + 4 * self.ramp_sigma+ 200)
 
-            if self.ge_pi:
-                self.waveforms['qubit drive I'][ii] += ap2.sideband(wtpts,
-                                 ap2.square(wtpts, a,self.origin - ef_length - 2*w - 3*self.ramp_sigma, w,self.ramp_sigma), np.zeros(len(wtpts)),
-                                  self.freq, self.phase)[0]
-                self.waveforms['qubit drive Q'][ii] += ap2.sideband(wtpts,
-                                 ap2.square(wtpts, a,self.origin - ef_length - 2*w - 3*self.ramp_sigma , w,self.ramp_sigma), np.zeros(len(wtpts)),
-                                  self.freq, self.phase)[1]
-                self.markers['qubit buffer'][ii] += ap2.square(mtpts, 1, self.origin - ef_length - 2*w - 8 * self.ramp_sigma - 100 ,
-                                                      w + 4 * self.ramp_sigma+ 200)
             high_values_indices = self.markers['qubit buffer'][ii] > 1
             self.markers['qubit buffer'][ii][high_values_indices] = 1
 
         if self.pulse_type == 'gauss':
-            gauss_sigma=w #covention for the width of gauss pulse
-            self.waveforms['qubit drive I'][ii], self.waveforms['qubit drive Q'][ii] = \
-                ap2.sideband(wtpts,
-                             ap2.gauss(wtpts, a,self.origin - 3* gauss_sigma , gauss_sigma), np.zeros(len(wtpts)),
-                              self.freq, self.phase)
 
-            self.markers['qubit buffer'][ii] = ap2.square(mtpts, 1, self.origin - 6*gauss_sigma - 100 ,
-                                                      6*gauss_sigma + 200)
-
-            self.waveforms['qubit drive I'][ii] += ap2.sideband(wtpts,
-                             ap2.gauss(wtpts, a,self.origin - 3* ef_length - 6*gauss_sigma, ef_length), np.zeros(len(wtpts)),
+            self.waveforms['qubit drive I'][ii] = ap2.sideband(wtpts,
+                             ap2.gauss(wtpts, a,self.origin - 3* pulse_probe_len , pulse_probe_len), np.zeros(len(wtpts)),
                               self.fe_sideband_freq, self.phase)[0]
-            self.waveforms['qubit drive Q'][ii] += ap2.sideband(wtpts,
-                             ap2.gauss(wtpts, a,self.origin - 3* ef_length - 6*gauss_sigma, ef_length), np.zeros(len(wtpts)),
+            self.waveforms['qubit drive Q'][ii] = ap2.sideband(wtpts,
+                             ap2.gauss(wtpts, a,self.origin - 3* pulse_probe_len , pulse_probe_len), np.zeros(len(wtpts)),
                               self.fe_sideband_freq, self.phase)[1]
-            self.markers['qubit buffer'][ii] += ap2.square(mtpts, 1, self.origin - 6*ef_length - 6*gauss_sigma - 100 ,
-                                                      6*ef_length+ 200)
+            self.markers['qubit buffer'][ii]+= ap2.square(mtpts, 1, self.origin - 6*pulse_probe_len - 100 ,
+                                                      6*pulse_probe_len+ 200)
 
-            if self.ge_pi:
-                self.waveforms['qubit drive I'][ii] += ap2.sideband(wtpts,
-                                 ap2.gauss(wtpts, a,self.origin - 3* gauss_sigma - 6*ef_length - 6*gauss_sigma, gauss_sigma), np.zeros(len(wtpts)),
-                                  self.freq, self.phase)[0]
-                self.waveforms['qubit drive Q'][ii] += ap2.sideband(wtpts,
-                                 ap2.gauss(wtpts, a,self.origin - 3* gauss_sigma - 6*ef_length - 6*gauss_sigma , gauss_sigma), np.zeros(len(wtpts)),
-                                  self.freq, self.phase)[1]
-                self.markers['qubit buffer'][ii] += ap2.square(mtpts, 1, self.origin - 6*gauss_sigma - 6*ef_length - 6*gauss_sigma - 100 ,
-                                                          6*gauss_sigma + 200)
             high_values_indices = self.markers['qubit buffer'][ii] > 1
             self.markers['qubit buffer'][ii][high_values_indices] = 1
 
