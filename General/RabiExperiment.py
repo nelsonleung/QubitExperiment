@@ -16,7 +16,7 @@ class RabiExperiment(Experiment):
             self.ready_to_go = False
             return
 
-        self.pulse_sequence = RabiSequence(self.cfg['awgs'], self.cfg['rabi'], self.cfg['readout'])
+        self.pulse_sequence = RabiSequence_2(self.cfg['awgs'], self.cfg['rabi'], self.cfg['readout'], self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
