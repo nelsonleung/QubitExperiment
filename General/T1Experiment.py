@@ -2,7 +2,7 @@ __author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.experiments.General.PulseSequences.StandardPulseSequences import T1Sequence
+from slab.experiments.General.PulseSequences.StandardPulseSequences import T1Sequence_2
 from numpy import mean, arange
 
 
@@ -25,7 +25,7 @@ class T1Experiment(Experiment):
             self.ready_to_go = False
             return
 
-        self.pulse_sequence = T1Sequence(self.cfg['awgs'], self.cfg['t1'], self.cfg['readout'],self.cfg['pulse_info'][self.pulse_type])
+        self.pulse_sequence = T1Sequence_2(self.cfg['awgs'], self.cfg['t1'], self.cfg['readout'],self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 

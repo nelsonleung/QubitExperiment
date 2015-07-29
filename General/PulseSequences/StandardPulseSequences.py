@@ -12,64 +12,34 @@ from liveplot import LivePlotClient
 
 class RabiSequence_2(PulseSequence):
     def __init__(self, awg_info, rabi_cfg, readout_cfg, pulse_cfg):
-        """
-        rabi_cfg = {rabi_pts, sweep_type="time", pulse_type="square", a=0, w=0, sigma=0, freq=0, phase=0}
-        readout_cfg = {"Q": 10000, "delay": , "width": , "card_delay": , "card_trig_width":  }
-        """
 
         self.rabi_cfg = rabi_cfg
-        if self.rabi_cfg['step'] is not None:
-            self.rabi_pts = arange(self.rabi_cfg['start'], self.rabi_cfg['stop'], self.rabi_cfg['step'])
-        else:
-            self.rabi_pts = linspace(self.rabi_cfg['start'], self.rabi_cfg['stop'], self.rabi_cfg['num_pts'])
+        self.define_pts()
         sequence_length = len(self.rabi_pts)
 
         PulseSequence.__init__(self, "Rabi", awg_info, sequence_length)
-
-        self.sweep_type = rabi_cfg['sweep_type']
-        self.pulse_type = rabi_cfg['pulse_type']
-        self.a = rabi_cfg['a']
-        self.w = rabi_cfg['w']
-
-        self.freq = rabi_cfg['freq']
-        self.phase = rabi_cfg['phase']
-        self.measurement_delay = readout_cfg['delay']
-        self.measurement_width = readout_cfg['width']
-        self.card_delay = readout_cfg['card_delay']
-        self.monitor_pulses = readout_cfg['monitor_pulses']
-        self.card_trig_width = readout_cfg['card_trig_width']
-
-        if self.pulse_type == 'square':
-            self.ramp_sigma = rabi_cfg['ramp_sigma']
-            if self.rabi_cfg['sweep_type'] == 'time':
-                max_pulse_width = max(self.rabi_pts) + 4 * self.ramp_sigma
-            else:
-                max_pulse_width = self.w + 4 * self.ramp_sigma
-
-        if self.pulse_type == 'gauss':
-            if self.rabi_cfg['sweep_type'] == 'time':
-                max_pulse_width = 6 * max(self.rabi_pts)
-            else:
-                max_pulse_width = 6 * self.w
-
-        self.max_length = round_samples((max_pulse_width + self.measurement_delay + self.measurement_width + 1000))
-        self.origin = self.max_length - (self.measurement_delay + self.measurement_width + 500)
 
         self.tek1psb = TEK1PulseSequenceBuilder(pulse_cfg, readout_cfg)
         self.pulse_sequence_matrix = []
         total_pulse_span_length_list = []
 
-        for ii, pts in enumerate(self.rabi_pts):
-            self.tek1psb.append('general', 'gauss', 1, pts, 0, 0)
-
-            self.pulse_sequence_matrix.append(self.tek1psb.pulse_sequence_list)
+        for ii, pt in enumerate(self.rabi_pts):
+            self.define_pulse(pt)
+            self.pulse_sequence_matrix.append(self.tek1psb.get_pulse_sequence())
             total_pulse_span_length_list.append(self.tek1psb.total_pulse_span_length)
-            self.tek1psb.clear_pulse()
 
         max_length = self.tek1psb.get_max_length(total_pulse_span_length_list)
         print max_length
         self.set_all_lengths(max_length)
 
+    def define_pts(self):
+        if self.rabi_cfg['step'] is not None:
+            self.rabi_pts = arange(self.rabi_cfg['start'], self.rabi_cfg['stop'], self.rabi_cfg['step'])
+        else:
+            self.rabi_pts = linspace(self.rabi_cfg['start'], self.rabi_cfg['stop'], self.rabi_cfg['num_pts'])
+
+    def define_pulse(self,pt):
+        self.tek1psb.append('general', 'gauss', 1, pt, 0, 0)
 
     def build_sequence(self):
         PulseSequence.build_sequence(self)
@@ -89,6 +59,58 @@ class RabiSequence_2(PulseSequence):
 
     def reshape_data(self, data):
         return np.reshape(data, (self.sequence_length, self.waveform_length))
+
+class T1Sequence_2(PulseSequence):
+    def __init__(self, awg_info, t1_cfg, readout_cfg, pulse_cfg):
+
+        self.t1_cfg = t1_cfg
+        self.define_pts()
+        sequence_length = len(self.t1_pts)
+
+        PulseSequence.__init__(self, "T1", awg_info, sequence_length)
+
+        self.tek1psb = TEK1PulseSequenceBuilder(pulse_cfg, readout_cfg)
+        self.pulse_sequence_matrix = []
+        total_pulse_span_length_list = []
+
+        for ii, pt in enumerate(self.t1_pts):
+            self.define_pulse(pt)
+            self.pulse_sequence_matrix.append(self.tek1psb.get_pulse_sequence())
+            total_pulse_span_length_list.append(self.tek1psb.total_pulse_span_length)
+
+        max_length = self.tek1psb.get_max_length(total_pulse_span_length_list)
+        print max_length
+        self.set_all_lengths(max_length)
+
+    def define_pts(self):
+        if self.t1_cfg['step'] is not None:
+            self.t1_pts = arange(self.t1_cfg['start'], self.t1_cfg['stop'], self.t1_cfg['step'])
+        else:
+            self.t1_pts = linspace(self.t1_cfg['start'], self.t1_cfg['stop'], self.t1_cfg['num_pts'])
+
+    def define_pulse(self,pt):
+        self.tek1psb.append('pi', 'gauss')
+        self.tek1psb.idle(pt)
+
+    def build_sequence(self):
+        PulseSequence.build_sequence(self)
+        wtpts = self.get_waveform_times('qubit drive I')
+        mtpts = self.get_marker_times('qubit buffer')
+        markers_readout = self.markers['readout pulse']
+        markers_card = self.markers['card trigger']
+        waveforms_qubit_I = self.waveforms['qubit drive I']
+        waveforms_qubit_Q = self.waveforms['qubit drive Q']
+        markers_qubit_buffer = self.markers['qubit buffer']
+        self.tek1psb.prepare_build(wtpts, mtpts, markers_readout, markers_card, waveforms_qubit_I, waveforms_qubit_Q,
+                              markers_qubit_buffer)
+        generated_sequences = self.tek1psb.build(self.pulse_sequence_matrix)
+
+        self.markers['readout pulse'], self.markers['card trigger'], self.waveforms['qubit drive I'], self.waveforms[
+            'qubit drive Q'], self.markers['qubit buffer'] = generated_sequences
+
+    def reshape_data(self, data):
+        return np.reshape(data, (self.sequence_length, self.waveform_length))
+
 
 
 class RabiSequence(PulseSequence):
@@ -519,7 +541,7 @@ class RamseySequence(PulseSequence):
         self.step = ramsey_cfg['step']
 
         self.a = pulse_cfg['a']
-        self.half_pi_length = pulse_cfg['half_pi_length']
+        self.half_pi_length = pulse_cfg['half_pi_sigma']
         self.freq = pulse_cfg['freq']
         self.phase = pulse_cfg['phase']
         self.measurement_delay = readout_cfg['delay']
