@@ -11,19 +11,19 @@ from liveplot import LivePlotClient
 
 
 class RabiSequence_2(PulseSequence):
-    def __init__(self, awg_info, rabi_cfg, readout_cfg, pulse_cfg):
+    def __init__(self, awg_info, expt_cfg, readout_cfg, pulse_cfg):
 
-        self.rabi_cfg = rabi_cfg
+        self.expt_cfg = expt_cfg
         self.define_pts()
-        sequence_length = len(self.rabi_pts)
+        sequence_length = len(self.expt_pts)
 
-        PulseSequence.__init__(self, "Rabi", awg_info, sequence_length)
+        PulseSequence.__init__(self, "Expt", awg_info, sequence_length)
 
         self.tek1psb = TEK1PulseSequenceBuilder(pulse_cfg, readout_cfg)
         self.pulse_sequence_matrix = []
         total_pulse_span_length_list = []
 
-        for ii, pt in enumerate(self.rabi_pts):
+        for ii, pt in enumerate(self.expt_pts):
             self.define_pulse(pt)
             self.pulse_sequence_matrix.append(self.tek1psb.get_pulse_sequence())
             total_pulse_span_length_list.append(self.tek1psb.total_pulse_span_length)
@@ -33,10 +33,10 @@ class RabiSequence_2(PulseSequence):
         self.set_all_lengths(max_length)
 
     def define_pts(self):
-        if self.rabi_cfg['step'] is not None:
-            self.rabi_pts = arange(self.rabi_cfg['start'], self.rabi_cfg['stop'], self.rabi_cfg['step'])
+        if self.expt_cfg['step'] is not None:
+            self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
         else:
-            self.rabi_pts = linspace(self.rabi_cfg['start'], self.rabi_cfg['stop'], self.rabi_cfg['num_pts'])
+            self.expt_pts = linspace(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['num_pts'])
 
     def define_pulse(self,pt):
         self.tek1psb.append('general', 'gauss', 1, pt, 0, 0)

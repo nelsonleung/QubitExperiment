@@ -2,7 +2,7 @@ __author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.experiments.General.PulseSequences.StandardPulseSequences import *
+from slab.experiments.General.PulseSequences.SingleQubitPulseSequences import *
 from numpy import mean, arange
 
 
@@ -16,11 +16,11 @@ class RabiExperiment(Experiment):
             self.ready_to_go = False
             return
 
-        self.pulse_sequence = RabiSequence_2(self.cfg['awgs'], self.cfg['rabi'], self.cfg['readout'], self.cfg['pulse_info'])
+        self.pulse_sequence = RabiSequence(prefix, self.cfg['awgs'], self.cfg['rabi'], self.cfg['readout'], self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
-        self.rabi_pts = self.pulse_sequence.rabi_pts
+        self.expt_pts = self.pulse_sequence.expt_pts
         #self.cfg['alazar']['samplesPerRecord'] = self.cfg['readout']['width']
         self.cfg['alazar']['recordsPerBuffer'] = self.pulse_sequence.sequence_length
         self.cfg['alazar']['recordsPerAcquisition'] = int(
@@ -67,13 +67,13 @@ class RabiExperiment(Experiment):
 
             self.plotter.plot_z('Rabi Data', rabi_data.T)
             rabi_avg_data = mean(rabi_data, 1)
-            self.plotter.plot_xy('Rabi XY', self.pulse_sequence.rabi_pts, rabi_avg_data)
+            self.plotter.plot_xy('Rabi XY', self.pulse_sequence.expt_pts, rabi_avg_data)
 
             print ii * min(self.cfg['rabi']['averages'], 100)
             with self.datafile() as f:
                 f.add('rabi_2d', rabi_data)
                 f.add('rabi_avg_data', rabi_avg_data)
-                f.add('rabi_pts', self.rabi_pts)
+                f.add('rabi_pts', self.expt_pts)
 
         if self.cfg['rabi']['calibrate']:
             self.post_run_analysis(self.rabi_pts,rabi_avg_data)

@@ -2,7 +2,7 @@ __author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.experiments.General.PulseSequences.StandardPulseSequences import T1Sequence_2
+from slab.experiments.General.PulseSequences.SingleQubitPulseSequences import T1Sequence
 from numpy import mean, arange
 
 
@@ -25,11 +25,11 @@ class T1Experiment(Experiment):
             self.ready_to_go = False
             return
 
-        self.pulse_sequence = T1Sequence_2(self.cfg['awgs'], self.cfg['t1'], self.cfg['readout'],self.cfg['pulse_info'])
+        self.pulse_sequence = T1Sequence(prefix, self.cfg['awgs'], self.cfg['t1'], self.cfg['readout'],self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
-        self.t1_pts = self.pulse_sequence.t1_pts
+        self.expt_pts = self.pulse_sequence.expt_pts
         #self.cfg['alazar']['samplesPerRecord'] = self.pulse_sequence.waveform_length
         self.cfg['alazar']['recordsPerBuffer'] = self.pulse_sequence.sequence_length
         self.cfg['alazar']['recordsPerAcquisition'] = int(
@@ -77,17 +77,17 @@ class T1Experiment(Experiment):
 
             self.plotter.plot_z('t1 Data', t1_data.T)
             t1_avg_data = mean(t1_data, 1)
-            self.plotter.plot_xy('t1 XY', self.pulse_sequence.t1_pts, t1_avg_data)
+            self.plotter.plot_xy('t1 XY', self.pulse_sequence.expt_pts, t1_avg_data)
 
             print ii * min(self.cfg['t1']['averages'], 100)
             with self.datafile() as f:
                 f.add('t1_2d', t1_data)
                 f.add('t1_avg_data', t1_avg_data)
-                f.add('t1_pts', self.t1_pts)
-        self.post_run_analysis(self.t1_pts,t1_avg_data)
+                f.add('t1_pts', self.expt_pts)
+        self.post_run_analysis(self.expt_pts,t1_avg_data)
 
 
-    def post_run_analysis(self,t1_pts,t1_avg_data):
+    def post_run_analysis(self,expt_pts,t1_avg_data):
         print "Analyzing T1 Data"
-        fitdata = fitexp(t1_pts,t1_avg_data)
+        fitdata = fitexp(expt_pts,t1_avg_data)
         print "T1: " + str(fitdata[3]) + " ns"
