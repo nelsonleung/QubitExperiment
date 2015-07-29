@@ -33,18 +33,6 @@ class SingleQubitPulseSequence(PulseSequence):
         print max_length
         self.set_all_lengths(max_length)
 
-    def define_points(self):
-        if self.expt_cfg['step'] is not None:
-            self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-        else:
-            self.expt_pts = linspace(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['num_pts'])
-
-    def define_parameters(self):
-        pass
-
-    def define_pulses(self,pt):
-        self.tek1psb.append('general', 'gauss', 1, pt, 0, 0)
-
     def build_sequence(self):
         PulseSequence.build_sequence(self)
         wtpts = self.get_waveform_times('qubit drive I')
@@ -69,15 +57,13 @@ class RabiSequence(SingleQubitPulseSequence):
         SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
-        if self.expt_cfg['step'] is not None:
-            self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-        else:
-            self.expt_pts = linspace(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['num_pts'])
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
     def define_parameters(self):
-        pass
+        self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.tek1psb.append('general', 'gauss', 1, pt, 0, 0)
+        self.tek1psb.append('general', self.pulse_type, amp=1, length=pt)
 
 
 class T1Sequence(SingleQubitPulseSequence):
@@ -85,10 +71,8 @@ class T1Sequence(SingleQubitPulseSequence):
         SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
-        if self.expt_cfg['step'] is not None:
-            self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-        else:
-            self.expt_pts = linspace(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['num_pts'])
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
     def define_parameters(self):
         pass
 

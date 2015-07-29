@@ -1,15 +1,10 @@
-__author__ = 'dave'
+__author__ = 'Nelson'
 
 from slab.instruments.awg.PulseSequence import *
 from slab.experiments.ExpLib import awgpulses as ap
 from numpy import arange, linspace
 
 from liveplot import LivePlotClient
-
-# lp=LivePlotClient()
-
-
-
 
 class Pulse():
     def __init__(self, name, type, amp, length, freq, phase, span_length):
@@ -31,17 +26,15 @@ class TEK1PulseSequenceBuilder():
         self.pulse_sequence_list = []
         self.total_pulse_span_length = 0
 
-    def append(self, name, type, amp=None, length=None, freq=None, phase=None):
-        if name is "pi":
+    def append(self, name, type, amp=0, length=0, freq=0, phase=0):
+        if name == "pi":
             amp=self.pulse_cfg[type]['a']
             length=self.pulse_cfg[type]['pi_length']
             freq=self.pulse_cfg[type]['freq']
-            phase=self.pulse_cfg[type]['phase']
-        if name is "half_pi":
+        if name == "half_pi":
             amp=self.pulse_cfg[type]['a']
             length=self.pulse_cfg[type]['half_pi_length']
             freq=self.pulse_cfg[type]['freq']
-            phase=self.pulse_cfg[type]['phase']
 
         pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
         pulse = Pulse(name, type, amp, length, freq, phase, pulse_span_length)
@@ -99,7 +92,7 @@ class TEK1PulseSequenceBuilder():
             for jj in range(len(pulse_sequence_matrix[ii]) - 1, -1, -1):
                 pulse = pulse_sequence_matrix[ii][jj]
                 pulse_recorded = False
-                if pulse.type is "square":
+                if pulse.type == "square":
                     pulse_recorded = True
                     pulse_waveform = ap.sideband(self.wtpts,
                                                      ap.square(self.wtpts, pulse.amp,
@@ -116,7 +109,7 @@ class TEK1PulseSequenceBuilder():
                                                                       'ramp_sigma'] - self.marker_start_end_buffer,
                                                                   pulse.length + 6 * self.pulse_cfg['square'][
                                                                       'ramp_sigma'] + 2 * self.marker_start_end_buffer)
-                if pulse.type is "gauss":
+                if pulse.type == "gauss":
                     pulse_recorded = True
                     pulse_waveform = ap.sideband(self.wtpts,
                                                      ap.gauss(self.wtpts, pulse.amp,
@@ -129,7 +122,7 @@ class TEK1PulseSequenceBuilder():
                                                                    self.origin - pulse_location - 6 * pulse.length - self.marker_start_end_buffer,
                                                                    6 * pulse.length + self.marker_start_end_buffer)
 
-                if pulse.type is "idle":
+                if pulse.type == "idle":
                     pulse_recorded = True
 
                 pulse_location += pulse.span_length
