@@ -41,7 +41,7 @@ class TEK1PulseSequenceBuilder():
         pulse = Pulse(name, type, amp, length, freq, phase, pulse_span_length)
 
         self.pulse_sequence_list.append(pulse)
-        self.total_pulse_span_length = pulse_span_length
+        self.total_pulse_span_length += pulse_span_length
 
     def idle(self, length):
         pulse_info = Pulse('idle', 'idle', 0, length, 0, 0, length)
@@ -53,6 +53,11 @@ class TEK1PulseSequenceBuilder():
         pulse_sequence_list = self.pulse_sequence_list
         self.pulse_sequence_list = []
         return pulse_sequence_list
+
+    def get_total_pulse_span_length(self):
+        total_pulse_span_length = self.total_pulse_span_length
+        self.total_pulse_span_length = 0
+        return total_pulse_span_length
 
     def acquire_readout_cfg(self):
         self.measurement_delay = self.readout_cfg['delay']
@@ -89,6 +94,7 @@ class TEK1PulseSequenceBuilder():
                 ap.sideband(self.wtpts,
                             np.zeros(len(self.wtpts)), np.zeros(len(self.wtpts)),
                             0, 0)
+            self.markers_qubit_buffer[ii] = ap.square(self.mtpts, 0, 0, 0)
             pulse_location = 0
             for jj in range(len(pulse_sequence_matrix[ii]) - 1, -1, -1):
                 pulse = pulse_sequence_matrix[ii][jj]
@@ -105,7 +111,7 @@ class TEK1PulseSequenceBuilder():
                     self.waveforms_qubit_I[ii] += pulse_waveform[0]
                     self.waveforms_qubit_Q[ii] += pulse_waveform[1]
 
-                    self.markers_qubit_buffer[ii] = ap.square(self.mtpts, 1, self.origin - pulse_location - 6 *
+                    self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1, self.origin - pulse_location - 6 *
                                                               self.pulse_cfg['square'][
                                                                   'ramp_sigma'] - self.marker_start_end_buffer,
                                                               pulse.length + 6 * self.pulse_cfg['square'][
@@ -119,9 +125,12 @@ class TEK1PulseSequenceBuilder():
                                                  pulse.freq, pulse.phase)
                     self.waveforms_qubit_I[ii] += pulse_waveform[0]
                     self.waveforms_qubit_Q[ii] += pulse_waveform[1]
-                    self.markers_qubit_buffer[ii] = ap.square(self.mtpts, 1,
+                    self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1,
                                                               self.origin - pulse_location - 6 * pulse.length - self.marker_start_end_buffer,
                                                               6 * pulse.length + 2 * self.marker_start_end_buffer)
+
+                high_values_indices = self.markers_qubit_buffer[ii] > 1
+                self.markers_qubit_buffer[ii][high_values_indices] = 1
 
                 if pulse.type == "idle":
                     pulse_recorded = True

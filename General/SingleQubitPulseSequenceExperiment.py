@@ -17,6 +17,8 @@ class SingleQubitPulseSequenceExperiment(Experiment):
         self.pre_run = pre_run
         self.post_run = post_run
 
+        self.pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
+
         self.pulse_sequence = PulseSequence(prefix, self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'],
                                             self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
@@ -50,7 +52,7 @@ class SingleQubitPulseSequenceExperiment(Experiment):
         self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
 
         if self.pre_run is not None:
-            pre_run()
+            self.pre_run()
 
         print "Prep Card"
         adc = Alazar(self.cfg['alazar'])
@@ -82,8 +84,8 @@ class SingleQubitPulseSequenceExperiment(Experiment):
 class RabiExperiment(SingleQubitPulseSequenceExperiment):
     def __init__(self, path='', prefix='Rabi', config_file=None, **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=RabiSequence, pre_run=self.pre_run(),
-                                                    post_run=self.post_run(), **kwargs)
+                                                    PulseSequence=RabiSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
 
     def pre_run(self):
         self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg[self.expt_cfg_name]['iq_freq'])
@@ -116,8 +118,8 @@ class RabiExperiment(SingleQubitPulseSequenceExperiment):
 class T1Experiment(SingleQubitPulseSequenceExperiment):
     def __init__(self, path='', prefix='T1', config_file=None, **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=T1Sequence, pre_run=self.pre_run(),
-                                                    post_run=self.post_run(), **kwargs)
+                                                    PulseSequence=T1Sequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
 
     def pre_run(self):
         pass
@@ -126,6 +128,26 @@ class T1Experiment(SingleQubitPulseSequenceExperiment):
         print "Analyzing T1 Data"
         fitdata = fitexp(expt_pts, t1_avg_data)
         print "T1: " + str(fitdata[3]) + " ns"
+
+
+class RamseyExperiment(SingleQubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='Ramsey', config_file=None, **kwargs):
+        SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=RamseySequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        self.drive.set_frequency(
+            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] + self.cfg['ramsey'][
+                'ramsey_freq'])
+
+    def post_run(self, expt_pts, expt_avg_data):
+        print "Analyzing Ramsey Data"
+        fitdata = fitdecaysin(expt_pts, expt_avg_data)
+        suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
+        print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+        print "T2*: " + str(fitdata[3]) + " ns"
+        print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
 
 
 
