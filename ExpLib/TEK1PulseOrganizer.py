@@ -6,6 +6,7 @@ from numpy import arange, linspace
 
 from liveplot import LivePlotClient
 
+
 class Pulse():
     def __init__(self, name, type, amp, length, freq, phase, span_length):
         self.name = name
@@ -28,13 +29,13 @@ class TEK1PulseSequenceBuilder():
 
     def append(self, name, type, amp=0, length=0, freq=0, phase=0):
         if name == "pi":
-            amp=self.pulse_cfg[type]['a']
-            length=self.pulse_cfg[type]['pi_length']
-            freq=self.pulse_cfg[type]['freq']
+            amp = self.pulse_cfg[type]['a']
+            length = self.pulse_cfg[type]['pi_length']
+            freq = self.pulse_cfg[type]['iq_freq']
         if name == "half_pi":
-            amp=self.pulse_cfg[type]['a']
-            length=self.pulse_cfg[type]['half_pi_length']
-            freq=self.pulse_cfg[type]['freq']
+            amp = self.pulse_cfg[type]['a']
+            length = self.pulse_cfg[type]['half_pi_length']
+            freq = self.pulse_cfg[type]['iq_freq']
 
         pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
         pulse = Pulse(name, type, amp, length, freq, phase, pulse_span_length)
@@ -95,32 +96,32 @@ class TEK1PulseSequenceBuilder():
                 if pulse.type == "square":
                     pulse_recorded = True
                     pulse_waveform = ap.sideband(self.wtpts,
-                                                     ap.square(self.wtpts, pulse.amp,
-                                                               self.origin - pulse_location - pulse.length - 3 *
-                                                               self.pulse_cfg['square']['ramp_sigma'], pulse.length,
-                                                               self.pulse_cfg['square']['ramp_sigma']),
-                                                     np.zeros(len(self.wtpts)),
-                                                     pulse.freq, pulse.phase)
+                                                 ap.square(self.wtpts, pulse.amp,
+                                                           self.origin - pulse_location - pulse.length - 3 *
+                                                           self.pulse_cfg['square']['ramp_sigma'], pulse.length,
+                                                           self.pulse_cfg['square']['ramp_sigma']),
+                                                 np.zeros(len(self.wtpts)),
+                                                 pulse.freq, pulse.phase)
                     self.waveforms_qubit_I[ii] += pulse_waveform[0]
                     self.waveforms_qubit_Q[ii] += pulse_waveform[1]
 
                     self.markers_qubit_buffer[ii] = ap.square(self.mtpts, 1, self.origin - pulse_location - 6 *
-                                                                  self.pulse_cfg['square'][
-                                                                      'ramp_sigma'] - self.marker_start_end_buffer,
-                                                                  pulse.length + 6 * self.pulse_cfg['square'][
-                                                                      'ramp_sigma'] + 2 * self.marker_start_end_buffer)
+                                                              self.pulse_cfg['square'][
+                                                                  'ramp_sigma'] - self.marker_start_end_buffer,
+                                                              pulse.length + 6 * self.pulse_cfg['square'][
+                                                                  'ramp_sigma'] + 2 * self.marker_start_end_buffer)
                 if pulse.type == "gauss":
                     pulse_recorded = True
                     pulse_waveform = ap.sideband(self.wtpts,
-                                                     ap.gauss(self.wtpts, pulse.amp,
-                                                              self.origin - pulse_location - 3 * pulse.length,
-                                                              pulse.length), np.zeros(len(self.wtpts)),
-                                                     pulse.freq, pulse.phase)
+                                                 ap.gauss(self.wtpts, pulse.amp,
+                                                          self.origin - pulse_location - 3 * pulse.length,
+                                                          pulse.length), np.zeros(len(self.wtpts)),
+                                                 pulse.freq, pulse.phase)
                     self.waveforms_qubit_I[ii] += pulse_waveform[0]
                     self.waveforms_qubit_Q[ii] += pulse_waveform[1]
                     self.markers_qubit_buffer[ii] = ap.square(self.mtpts, 1,
-                                                                   self.origin - pulse_location - 6 * pulse.length - self.marker_start_end_buffer,
-                                                                   6 * pulse.length + self.marker_start_end_buffer)
+                                                              self.origin - pulse_location - 6 * pulse.length - self.marker_start_end_buffer,
+                                                              6 * pulse.length + 2 * self.marker_start_end_buffer)
 
                 if pulse.type == "idle":
                     pulse_recorded = True
@@ -128,8 +129,6 @@ class TEK1PulseSequenceBuilder():
                 pulse_location += pulse.span_length
                 if pulse_recorded == False:
                     raise ValueError('Pulse is not defined.')
-
-
 
         return (self.markers_readout,
                 self.markers_card,

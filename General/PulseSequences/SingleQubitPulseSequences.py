@@ -7,9 +7,6 @@ from slab.experiments.ExpLib.TEK1PulseOrganizer import *
 
 from liveplot import LivePlotClient
 
-# lp=LivePlotClient()
-
-
 class SingleQubitPulseSequence(PulseSequence):
     def __init__(self, name, awg_info, expt_cfg, readout_cfg, pulse_cfg, define_points, define_parameters, define_pulses):
 
@@ -74,9 +71,9 @@ class T1Sequence(SingleQubitPulseSequence):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
 
     def define_parameters(self):
-        pass
+        self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.tek1psb.append('pi', 'gauss')
+        self.tek1psb.append('pi', self.pulse_type)
         self.tek1psb.idle(pt)
 

@@ -12,19 +12,6 @@ class T1Experiment(Experiment):
 
         self.pulse_type = self.cfg['t1']['pulse_type']
 
-        if self.cfg['pulse_info'][self.pulse_type] is None:
-            print "This pulse type is not valid."
-            self.ready_to_go = False
-            return
-
-
-        pulse_calibrated = self.cfg['pulse_info'][self.pulse_type]['rabi_calibrated']
-
-        if not pulse_calibrated:
-            print "This pulse type has not been calibrated."
-            self.ready_to_go = False
-            return
-
         self.pulse_sequence = T1Sequence(prefix, self.cfg['awgs'], self.cfg['t1'], self.cfg['readout'],self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
@@ -51,8 +38,8 @@ class T1Experiment(Experiment):
         self.readout_shifter.set_phase(self.cfg['readout']['start_phase'] + self.cfg['readout']['phase_slope'] * (
             self.cfg['readout']['frequency'] - self.cfg['readout']['bare_frequency']), self.cfg['readout']['frequency'])
 
-        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['freq'])
-        self.drive.set_power(self.cfg['t1']['power'])
+        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+        self.drive.set_power(self.cfg['drive']['power'])
         self.drive.set_ext_pulse(mod=True)
         self.drive.set_output(True)
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
@@ -77,7 +64,7 @@ class T1Experiment(Experiment):
 
             self.plotter.plot_z('t1 Data', t1_data.T)
             t1_avg_data = mean(t1_data, 1)
-            self.plotter.plot_xy('t1 XY', self.pulse_sequence.expt_pts, t1_avg_data)
+            self.plotter.plot_xy('t1 XY', self.expt_pts, t1_avg_data)
 
             print ii * min(self.cfg['t1']['averages'], 100)
             with self.datafile() as f:
