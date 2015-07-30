@@ -1,14 +1,13 @@
 __author__ = 'Nelson'
 
 from slab.instruments.awg.PulseSequence import *
-from slab.instruments.awg import awgpulses2 as ap2
 from numpy import arange, linspace
 from slab.experiments.ExpLib.TEK1PulseOrganizer import *
 
 from liveplot import LivePlotClient
 
 class SingleQubitPulseSequence(PulseSequence):
-    def __init__(self, name, awg_info, expt_cfg, readout_cfg, pulse_cfg, define_points, define_parameters, define_pulses):
+    def __init__(self, name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg, define_points, define_parameters, define_pulses):
 
         self.expt_cfg = expt_cfg
         define_points()
@@ -17,7 +16,7 @@ class SingleQubitPulseSequence(PulseSequence):
 
         PulseSequence.__init__(self, name, awg_info, sequence_length)
 
-        self.tek1psb = TEK1PulseSequenceBuilder(pulse_cfg, readout_cfg)
+        self.tek1psb = TEK1PulseSequenceBuilder(pulse_cfg, readout_cfg, buffer_cfg)
         self.pulse_sequence_matrix = []
         total_pulse_span_length_list = []
 
@@ -50,8 +49,8 @@ class SingleQubitPulseSequence(PulseSequence):
         return np.reshape(data, (self.sequence_length, self.waveform_length))
 
 class RabiSequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
-        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -64,8 +63,8 @@ class RabiSequence(SingleQubitPulseSequence):
 
 
 class T1Sequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
-        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -79,8 +78,8 @@ class T1Sequence(SingleQubitPulseSequence):
 
 
 class RamseySequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
-        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -95,8 +94,8 @@ class RamseySequence(SingleQubitPulseSequence):
 
 
 class SpinEchoSequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
-        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg,buffer_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -113,10 +112,10 @@ class SpinEchoSequence(SingleQubitPulseSequence):
 
 
 class EFRabiSequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
         self.qubit_cfg = qubit_cfg
         self.pulse_cfg = pulse_cfg
-        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg,buffer_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
