@@ -115,7 +115,7 @@ class TEK1PulseSequenceBuilder():
                                                               self.pulse_cfg['square'][
                                                                   'ramp_sigma'] - self.marker_start_end_buffer,
                                                               pulse.length + 6 * self.pulse_cfg['square'][
-                                                                  'ramp_sigma'] + 2 * self.marker_start_end_buffer)
+                                                                  'ramp_sigma'] + self.marker_start_end_buffer)
                 if pulse.type == "gauss":
                     pulse_recorded = True
                     pulse_waveform = ap.sideband(self.wtpts,
@@ -127,7 +127,7 @@ class TEK1PulseSequenceBuilder():
                     self.waveforms_qubit_Q[ii] += pulse_waveform[1]
                     self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1,
                                                               self.origin - pulse_location - 6 * pulse.length - self.marker_start_end_buffer,
-                                                              6 * pulse.length + 2 * self.marker_start_end_buffer)
+                                                              6 * pulse.length + self.marker_start_end_buffer)
 
                 high_values_indices = self.markers_qubit_buffer[ii] > 1
                 self.markers_qubit_buffer[ii][high_values_indices] = 1

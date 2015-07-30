@@ -92,3 +92,21 @@ class RamseySequence(SingleQubitPulseSequence):
         self.tek1psb.append('half_pi', self.pulse_type)
         self.tek1psb.idle(pt)
         self.tek1psb.append('half_pi', self.pulse_type)
+
+
+class SpinEchoSequence(SingleQubitPulseSequence):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg):
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        self.tek1psb.append('half_pi', self.pulse_type)
+        self.tek1psb.idle(pt/2.0)
+        self.tek1psb.append('pi', self.pulse_type)
+        self.tek1psb.idle(pt/2.0)
+        self.tek1psb.append('half_pi', self.pulse_type)

@@ -150,4 +150,25 @@ class RamseyExperiment(SingleQubitPulseSequenceExperiment):
         print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
 
 
+class SpinEchoExperiment(SingleQubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='Spin_Echo', config_file=None, **kwargs):
+        SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=SpinEchoSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        self.drive.set_frequency(
+            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] + self.cfg['ramsey'][
+                'ramsey_freq'])
+
+    def post_run(self, expt_pts, expt_avg_data):
+        print "Analyzing Spin Echo Data"
+        fitdata = fitdecaysin(expt_pts, expt_avg_data)
+        suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
+        print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+        print "T2*: " + str(fitdata[3]) + " ns"
+        print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+
+
+
 
