@@ -10,14 +10,13 @@ class PulseProbeExperiment(Experiment):
     def __init__(self, path='', prefix='Pulse_Probe', config_file=None, use_cal=False, **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
-        self.pulse_type = self.cfg['pulse_probe']['pulse_type']
+        self.expt_cfg_name = prefix.lower()
 
-        self.expt_pts = arange(self.cfg['pulse_probe']['start'], self.cfg['pulse_probe']['stop'], self.cfg['pulse_probe']['step'])
+        self.pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
 
+        self.expt_pts = arange(self.cfg[self.expt_cfg_name]['start'], self.cfg[self.expt_cfg_name]['stop'], self.cfg[self.expt_cfg_name]['step'])
 
-        pulse_calibrated = self.cfg['pulse_info'][self.pulse_type]['rabi_calibrated']
-
-        self.pulse_sequence = PulseProbeSequence(self.cfg['awgs'], self.cfg['pulse_probe'], self.cfg['readout'],self.cfg['pulse_info'][self.pulse_type], self.cfg['buffer'])
+        self.pulse_sequence = PulseProbeSequence(self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'],self.cfg['pulse_info'][self.pulse_type], self.cfg['buffer'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
