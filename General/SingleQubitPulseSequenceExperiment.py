@@ -7,6 +7,9 @@ from numpy import mean, arange
 
 
 class SingleQubitPulseSequenceExperiment(Experiment):
+    '''
+    Parent class for all the single qubit pulse sequence experiment.
+    '''
     def __init__(self, path='', prefix='SQPSE', config_file=None, PulseSequence=None, pre_run=None, post_run=None,
                  **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
@@ -94,13 +97,16 @@ class RabiExperiment(SingleQubitPulseSequenceExperiment):
         if self.cfg[self.expt_cfg_name]['calibrate_pulse']:
             print "Analyzing Rabi Data"
             fitdata = fitdecaysin(expt_pts, expt_avg_data)
-            excited_signal = np.sign(180 - fitdata[2] % 360)
-            pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
 
+            pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
+            # determine the start location of the rabi oscillation. +1 if it starts top; -1 if it starts bottom.
+            start_signal = np.sign(180 - fitdata[2] % 360)
             if pulse_type is 'gauss':
-                self.cfg['cal']['excited_signal'] = excited_signal
+                self.cfg['cal']['excited_signal'] = start_signal
+            # time takes to have the rabi oscillation phase to +/- pi/2
             pi_length = (self.cfg['cal']['excited_signal'] * np.sign(fitdata[0]) * 0.5 * np.pi - fitdata[
                 2] * np.pi / 180.) / (2 * np.pi * fitdata[1]) % (1 / fitdata[1])
+            # time takes to have the rabi oscillation phase to 0/ pi
             half_pi_length = (self.cfg['cal']['excited_signal'] * np.sign(fitdata[0]) * np.pi - fitdata[
                 2] * np.pi / 180.) / (2 * np.pi * fitdata[1]) % (0.5 / fitdata[1])
 
