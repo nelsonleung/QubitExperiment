@@ -20,7 +20,7 @@ class SingleQubitPulseSequenceExperiment(Experiment):
         self.pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
 
         self.pulse_sequence = PulseSequence(prefix, self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'],
-                                            self.cfg['pulse_info'])
+                                            self.cfg['pulse_info'], self.cfg['qubit'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
@@ -170,5 +170,18 @@ class SpinEchoExperiment(SingleQubitPulseSequenceExperiment):
         print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
 
 
+class EFRabiExperiment(SingleQubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='EF_Rabi', config_file=None, **kwargs):
+        SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=EFRabiSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run)
+
+    def pre_run(self):
+        self.drive.set_frequency(
+            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass
 
 

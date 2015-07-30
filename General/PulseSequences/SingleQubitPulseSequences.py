@@ -50,7 +50,7 @@ class SingleQubitPulseSequence(PulseSequence):
         return np.reshape(data, (self.sequence_length, self.waveform_length))
 
 class RabiSequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
         SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
@@ -64,7 +64,7 @@ class RabiSequence(SingleQubitPulseSequence):
 
 
 class T1Sequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
         SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
@@ -79,7 +79,7 @@ class T1Sequence(SingleQubitPulseSequence):
 
 
 class RamseySequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
         SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
@@ -95,7 +95,7 @@ class RamseySequence(SingleQubitPulseSequence):
 
 
 class SpinEchoSequence(SingleQubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
         SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
@@ -110,3 +110,24 @@ class SpinEchoSequence(SingleQubitPulseSequence):
         self.tek1psb.append('pi', self.pulse_type)
         self.tek1psb.idle(pt/2.0)
         self.tek1psb.append('half_pi', self.pulse_type)
+
+
+class EFRabiSequence(SingleQubitPulseSequence):
+    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg):
+        self.qubit_cfg = qubit_cfg
+        self.pulse_cfg = pulse_cfg
+        SingleQubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+        ef_freq = self.qubit_cfg['frequency']+self.qubit_cfg['alpha']
+        self.ef_sideband_freq = self.pulse_cfg[self.pulse_type]['iq_freq']-(self.qubit_cfg['frequency']-ef_freq)
+
+    def define_pulses(self,pt):
+        if self.expt_cfg['ge_pi']:
+            self.tek1psb.append('pi', self.pulse_type)
+        self.tek1psb.append('general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.ef_sideband_freq)
+        self.tek1psb.append('pi', self.pulse_type)
