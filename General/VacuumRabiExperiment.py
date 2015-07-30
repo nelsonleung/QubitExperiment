@@ -2,7 +2,6 @@ __author__ = 'Nelson'
 
 from slab import *
 from slab.instruments.Alazar import Alazar
-from slab.experiments.General.PulseSequences.StandardPulseSequences import RabiSequence
 from numpy import mean, arange
 
 
