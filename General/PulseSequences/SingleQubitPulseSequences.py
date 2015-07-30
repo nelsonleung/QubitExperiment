@@ -7,6 +7,9 @@ from slab.experiments.ExpLib.TEK1PulseOrganizer import *
 from liveplot import LivePlotClient
 
 class SingleQubitPulseSequence(PulseSequence):
+    '''
+    Parent class for all the single qubit pulse sequences.
+    '''
     def __init__(self, name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg, define_points, define_parameters, define_pulses):
 
         self.expt_cfg = expt_cfg
@@ -21,6 +24,7 @@ class SingleQubitPulseSequence(PulseSequence):
         total_pulse_span_length_list = []
 
         for ii, pt in enumerate(self.expt_pts):
+            # obtain pulse sequence for each experiment point
             define_pulses(pt)
             self.pulse_sequence_matrix.append(self.tek1psb.get_pulse_sequence())
             total_pulse_span_length_list.append(self.tek1psb.get_total_pulse_span_length())

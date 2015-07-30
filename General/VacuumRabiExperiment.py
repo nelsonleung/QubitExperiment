@@ -6,7 +6,7 @@ from numpy import mean, arange
 
 
 class VacuumRabiExperiment(Experiment):
-    def __init__(self, path='', prefix='Vacuum_Rabi', config_file=None, use_cal=False, **kwargs):
+    def __init__(self, path='', prefix='Vacuum_Rabi', config_file='..\\config.json', use_cal=False, **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
         self.expt_cfg_name = prefix.lower()

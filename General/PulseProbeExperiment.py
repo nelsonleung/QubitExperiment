@@ -7,7 +7,7 @@ from numpy import mean, arange
 
 
 class PulseProbeExperiment(Experiment):
-    def __init__(self, path='', prefix='Pulse_Probe', config_file=None, use_cal=False, **kwargs):
+    def __init__(self, path='', prefix='Pulse_Probe', config_file='..\\config.json', use_cal=False, **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
         self.expt_cfg_name = prefix.lower()
