@@ -82,7 +82,7 @@ class SingleQubitPulseSequenceExperiment(Experiment):
 
 
 class RabiExperiment(SingleQubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='Rabi', config_file=None, **kwargs):
+    def __init__(self, path='', prefix='Rabi', config_file='..\\config.json', **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
                                                     PulseSequence=RabiSequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
@@ -116,7 +116,7 @@ class RabiExperiment(SingleQubitPulseSequenceExperiment):
 
 
 class T1Experiment(SingleQubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='T1', config_file=None, **kwargs):
+    def __init__(self, path='', prefix='T1', config_file='..\\config.json', **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
                                                     PulseSequence=T1Sequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
@@ -131,7 +131,7 @@ class T1Experiment(SingleQubitPulseSequenceExperiment):
 
 
 class RamseyExperiment(SingleQubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='Ramsey', config_file=None, **kwargs):
+    def __init__(self, path='', prefix='Ramsey', config_file='..\\config.json', **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
                                                     PulseSequence=RamseySequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
@@ -151,7 +151,7 @@ class RamseyExperiment(SingleQubitPulseSequenceExperiment):
 
 
 class SpinEchoExperiment(SingleQubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='Spin_Echo', config_file=None, **kwargs):
+    def __init__(self, path='', prefix='Spin_Echo', config_file='..\\config.json', **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
                                                     PulseSequence=SpinEchoSequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
@@ -171,7 +171,7 @@ class SpinEchoExperiment(SingleQubitPulseSequenceExperiment):
 
 
 class EFRabiExperiment(SingleQubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='EF_Rabi', config_file=None, **kwargs):
+    def __init__(self, path='', prefix='EF_Rabi', config_file='..\\config.json', **kwargs):
         SingleQubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
                                                     PulseSequence=EFRabiSequence, pre_run=self.pre_run,
                                                     post_run=self.post_run)
