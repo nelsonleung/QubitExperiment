@@ -20,7 +20,7 @@ class SingleQubitPulseSequenceExperiment(Experiment):
         self.pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
 
         self.pulse_sequence = PulseSequence(prefix, self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'],
-                                            self.cfg['pulse_info'], self.cfg['qubit'])
+                                            self.cfg['pulse_info'], self.cfg['qubit'],self.cfg['buffer'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 

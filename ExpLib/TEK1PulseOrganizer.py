@@ -19,9 +19,9 @@ class Pulse():
 
 
 class TEK1PulseSequenceBuilder():
-    def __init__(self, pulse_cfg, readout_cfg):
-        self.start_end_buffer = 500
-        self.marker_start_end_buffer = 100
+    def __init__(self, pulse_cfg, readout_cfg,buffer_cfg):
+        self.start_end_buffer = buffer_cfg['tek1_start_end']
+        self.marker_start_buffer = buffer_cfg['marker_start']
         self.pulse_cfg = pulse_cfg
         self.readout_cfg = readout_cfg
         self.pulse_sequence_list = []
@@ -113,9 +113,9 @@ class TEK1PulseSequenceBuilder():
 
                     self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1, self.origin - pulse_location - 6 *
                                                               self.pulse_cfg['square'][
-                                                                  'ramp_sigma'] - self.marker_start_end_buffer,
+                                                                  'ramp_sigma'] - self.marker_start_buffer,
                                                               pulse.length + 6 * self.pulse_cfg['square'][
-                                                                  'ramp_sigma'] + self.marker_start_end_buffer)
+                                                                  'ramp_sigma'] + self.marker_start_buffer)
                 if pulse.type == "gauss":
                     pulse_recorded = True
                     pulse_waveform = ap.sideband(self.wtpts,
@@ -126,8 +126,8 @@ class TEK1PulseSequenceBuilder():
                     self.waveforms_qubit_I[ii] += pulse_waveform[0]
                     self.waveforms_qubit_Q[ii] += pulse_waveform[1]
                     self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1,
-                                                              self.origin - pulse_location - 6 * pulse.length - self.marker_start_end_buffer,
-                                                              6 * pulse.length + self.marker_start_end_buffer)
+                                                              self.origin - pulse_location - 6 * pulse.length - self.marker_start_buffer,
+                                                              6 * pulse.length + self.marker_start_buffer)
 
                 high_values_indices = self.markers_qubit_buffer[ii] > 1
                 self.markers_qubit_buffer[ii][high_values_indices] = 1
