@@ -7,14 +7,16 @@ from numpy import mean, arange
 
 
 class CWDriveExperiment(Experiment):
-    def __init__(self, path='', prefix='CW Drive', config_file=None, use_cal=False, **kwargs):
+    def __init__(self, path='', prefix='CW_Drive', config_file=None, use_cal=False, **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
-        #self.cfg['alazar']['samplesPerRecord'] = self.cfg['readout']['width']
+        self.expt_cfg_name = prefix.lower()
+
+        self.cfg['alazar']['samplesPerRecord'] = 2 ** (self.cfg['readout']['width'] - 1).bit_length()
         self.cfg['alazar']['recordsPerBuffer'] = 100
         self.cfg['alazar']['recordsPerAcquisition'] = 10000
 
-        self.cw_drive_pts = arange(self.cfg['cw_drive']['start'], self.cfg['cw_drive']['stop'], self.cfg['cw_drive']['step'])
+        self.expt_pts = arange(self.cfg[self.expt_cfg_name]['start'], self.cfg[self.expt_cfg_name]['stop'], self.cfg[self.expt_cfg_name]['step'])
 
         return
 
@@ -30,16 +32,15 @@ class CWDriveExperiment(Experiment):
         self.readout_shifter.set_phase((self.cfg['readout']['start_phase'])%360, self.cfg['readout']['frequency'])
 
         self.drive.set_output(True)
-        self.drive.set_power(self.cfg['cal']['drive_power'])
+        self.drive.set_power(self.cfg['drive']['power'])
         self.drive.set_ext_pulse(mod=False)
 
-        self.awg.set_amps_offsets(self.cfg['cw_drive']['iq_amps'], self.cfg['cw_drive']['iq_offsets'])
-        # self.save_config()
+        self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
 
         print "Prep Card"
         adc = Alazar(self.cfg['alazar'])
 
-        for freq in self.cw_drive_pts:
+        for freq in self.expt_pts:
             self.drive.set_frequency(freq)
 
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data()
