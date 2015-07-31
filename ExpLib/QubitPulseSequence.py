@@ -10,16 +10,16 @@ class QubitPulseSequence(PulseSequence):
     '''
     Parent class for all the single qubit pulse sequences.
     '''
-    def __init__(self, name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg, define_points, define_parameters, define_pulses):
+    def __init__(self, name, cfg, expt_cfg, define_points, define_parameters, define_pulses):
 
         self.expt_cfg = expt_cfg
         define_points()
         define_parameters()
         sequence_length = len(self.expt_pts)
 
-        PulseSequence.__init__(self, name, awg_info, sequence_length)
+        PulseSequence.__init__(self, name, cfg['awgs'], sequence_length)
 
-        self.psb = PulseSequenceBuilder(pulse_cfg, readout_cfg, buffer_cfg)
+        self.psb = PulseSequenceBuilder(cfg)
         self.pulse_sequence_matrix = []
         total_pulse_span_length_list = []
         self.total_flux_pulse_span_length_list = []

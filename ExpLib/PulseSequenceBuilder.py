@@ -21,21 +21,20 @@ class Pulse():
 
 
 class PulseSequenceBuilder():
-    def __init__(self, pulse_cfg, readout_cfg, buffer_cfg, **kwargs):
+    def __init__(self, cfg):
+        buffer_cfg = cfg['buffer']
         self.start_end_buffer = buffer_cfg['tek1_start_end']
         self.marker_start_buffer = buffer_cfg['marker_start']
         self.tek2_trigger_delay = buffer_cfg['tek2_trigger_delay']
-        self.pulse_cfg = pulse_cfg
-        self.readout_cfg = readout_cfg
+        self.pulse_cfg = cfg['pulse_info']
+        self.readout_cfg = cfg['readout']
         self.pulse_sequence_list = []
         self.total_pulse_span_length = 0
         self.total_flux_pulse_span_length = 0
         self.flux_pulse_started = False
         self.pulse_span_length_list_temp=[]
 
-        self.extra_cfg = {}
-        for name, value in kwargs.items():
-            self.extra_cfg[name] = value
+        self.mm_cfg = cfg['mm']
 
     def append(self, target, name, type, amp=0, length=0, freq=0, phase=0, **kwargs):
         '''
@@ -56,7 +55,7 @@ class PulseSequenceBuilder():
         elif target[:4] =="q,mm":
             print "Do something on q,mm"
             self.flux_pulse_started = True
-            pulse_span_length = ap.get_pulse_span_length(self.extra_cfg['mm_cfg']['flux_pulse_info'], type, length)
+            pulse_span_length = ap.get_pulse_span_length(self.mm_cfg['flux_pulse_info'], type, length)
             flux_pulse_span_length = pulse_span_length
             for span_length_temp in self.pulse_span_length_list_temp:
                 flux_pulse_span_length+=span_length_temp
@@ -196,9 +195,9 @@ class PulseSequenceBuilder():
                 elif pulse.target[:4] =="q,mm":
                     flux_pulse_started = True
                     mm_target = int(target[4])
-                    mm_target_info = extra_cfg['mm_cfg']['multimodes'][mm_target]
+                    mm_target_info = self.mm_cfg['multimodes'][mm_target]
                     if pulse.type == "square":
-                        waveforms_qubit_flux = flux_square(self.ftpts, flux_pulse_location,pulse,self.extra_cfg['mm_cfg']['flux_pulse_info'])
+                        waveforms_qubit_flux = flux_square(self.ftpts, flux_pulse_location,pulse,self.mm_cfg['flux_pulse_info'])
                     elif pulse.type == "gauss":
                         waveforms_qubit_flux = flux_gauss(self.ftpts, flux_pulse_location,pulse)
                     else:

@@ -9,8 +9,8 @@ from liveplot import LivePlotClient
 
 
 class RabiSequence(QubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
-        QubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, cfg, expt_cfg):
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -23,8 +23,8 @@ class RabiSequence(QubitPulseSequence):
 
 
 class T1Sequence(QubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
-        QubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg,self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, cfg, expt_cfg):
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -38,8 +38,8 @@ class T1Sequence(QubitPulseSequence):
 
 
 class RamseySequence(QubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
-        QubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, buffer_cfg,self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, cfg, expt_cfg):
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -54,8 +54,8 @@ class RamseySequence(QubitPulseSequence):
 
 
 class SpinEchoSequence(QubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
-        QubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg,buffer_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name,cfg, expt_cfg):
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
@@ -72,10 +72,10 @@ class SpinEchoSequence(QubitPulseSequence):
 
 
 class EFRabiSequence(QubitPulseSequence):
-    def __init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg, qubit_cfg ,buffer_cfg):
-        self.qubit_cfg = qubit_cfg
-        self.pulse_cfg = pulse_cfg
-        QubitPulseSequence.__init__(self,name, awg_info, expt_cfg, readout_cfg, pulse_cfg,buffer_cfg, self.define_points, self.define_parameters, self.define_pulses)
+    def __init__(self,name, cfg, expt_cfg):
+        self.qubit_cfg = cfg['qubit']
+        self.pulse_cfg = cfg['pulse_info']
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
         self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
