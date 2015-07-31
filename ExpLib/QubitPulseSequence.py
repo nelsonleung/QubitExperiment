@@ -30,24 +30,25 @@ class QubitPulseSequence(PulseSequence):
             total_pulse_span_length_list.append(self.psb.get_total_pulse_span_length())
 
         max_length = self.psb.get_max_length(total_pulse_span_length_list)
-        print max_length
         self.set_all_lengths(max_length)
 
     def build_sequence(self):
         PulseSequence.build_sequence(self)
         wtpts = self.get_waveform_times('qubit drive I')
         mtpts = self.get_marker_times('qubit buffer')
+        ftpts = self.get_waveform_times('qubit 1 flux')
         markers_readout = self.markers['readout pulse']
         markers_card = self.markers['card trigger']
         waveforms_qubit_I = self.waveforms['qubit drive I']
         waveforms_qubit_Q = self.waveforms['qubit drive Q']
+        waveforms_qubit_flux = self.waveforms['qubit 1 flux']
         markers_qubit_buffer = self.markers['qubit buffer']
-        self.psb.prepare_build(wtpts, mtpts, markers_readout, markers_card, waveforms_qubit_I, waveforms_qubit_Q,
+        self.psb.prepare_build(wtpts, mtpts, markers_readout, markers_card, waveforms_qubit_I, waveforms_qubit_Q, waveforms_qubit_flux,
                               markers_qubit_buffer)
         generated_sequences = self.psb.build(self.pulse_sequence_matrix)
 
         self.markers['readout pulse'], self.markers['card trigger'], self.waveforms['qubit drive I'], self.waveforms[
-            'qubit drive Q'], self.markers['qubit buffer'] = generated_sequences
+            'qubit drive Q'], self.waveforms['qubit 1 flux'], self.markers['qubit buffer'] = generated_sequences
 
     def reshape_data(self, data):
         return np.reshape(data, (self.sequence_length, self.waveform_length))

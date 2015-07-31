@@ -3,6 +3,7 @@ __author__ = 'Nelson'
 from slab.instruments.awg.PulseSequence import *
 from slab.experiments.ExpLib import awgpulses as ap
 from numpy import arange, linspace
+from slab.experiments.ExpLib.PulseWaveformBuildingLibrary import *
 
 from liveplot import LivePlotClient
 
@@ -19,7 +20,7 @@ class Pulse():
 
 
 class PulseSequenceBuilder():
-    def __init__(self, pulse_cfg, readout_cfg,buffer_cfg):
+    def __init__(self, pulse_cfg, readout_cfg, buffer_cfg):
         self.start_end_buffer = buffer_cfg['tek1_start_end']
         self.marker_start_buffer = buffer_cfg['marker_start']
         self.pulse_cfg = pulse_cfg
@@ -91,6 +92,7 @@ class PulseSequenceBuilder():
         return self.max_length
 
     def prepare_build(self, wtpts, mtpts, markers_readout, markers_card, waveforms_qubit_I, waveforms_qubit_Q,
+                      waveforms_qubit_flux,
                       markers_qubit_buffer):
         '''
         Being called internally to set the variables.
@@ -101,6 +103,7 @@ class PulseSequenceBuilder():
         self.markers_card = markers_card
         self.waveforms_qubit_I = waveforms_qubit_I
         self.waveforms_qubit_Q = waveforms_qubit_Q
+        self.waveforms_qubit_flux = waveforms_qubit_flux
         self.markers_qubit_buffer = markers_qubit_buffer
 
 
@@ -125,50 +128,27 @@ class PulseSequenceBuilder():
             pulse_location = 0
             # The range defined in this way means having the for loop with index backward.
             for jj in range(len(pulse_sequence_matrix[ii]) - 1, -1, -1):
+                pulse_defined = True
                 pulse = pulse_sequence_matrix[ii][jj]
-                pulse_recorded = False
                 if pulse.type == "square":
-                    pulse_recorded = True
-                    pulse_waveform = ap.sideband(self.wtpts,
-                                                 ap.square(self.wtpts, pulse.amp,
-                                                           self.origin - pulse_location - pulse.length - 3 *
-                                                           self.pulse_cfg['square']['ramp_sigma'], pulse.length,
-                                                           self.pulse_cfg['square']['ramp_sigma']),
-                                                 np.zeros(len(self.wtpts)),
-                                                 pulse.freq, pulse.phase)
-                    self.waveforms_qubit_I[ii] += pulse_waveform[0]
-                    self.waveforms_qubit_Q[ii] += pulse_waveform[1]
+                    qubit_waveforms, qubit_marker, flux_waveform = square(self.wtpts, self.mtpts,self.origin, self.marker_start_buffer,pulse_location,pulse,self.pulse_cfg)
+                elif pulse.type == "gauss":
+                    qubit_waveforms, qubit_marker, flux_waveform = gauss(self.wtpts, self.mtpts,self.origin, self.marker_start_buffer,pulse_location,pulse)
+                elif pulse.type == "idle":
+                    pulse_defined = False
+                else:
+                    raise ValueError('Wrong pulse type has been defined')
 
-                    self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1, self.origin - pulse_location - 6 *
-                                                              self.pulse_cfg['square'][
-                                                                  'ramp_sigma'] - self.marker_start_buffer,
-                                                              pulse.length + 6 * self.pulse_cfg['square'][
-                                                                  'ramp_sigma'] + self.marker_start_buffer)
-                if pulse.type == "gauss":
-                    pulse_recorded = True
-                    pulse_waveform = ap.sideband(self.wtpts,
-                                                 ap.gauss(self.wtpts, pulse.amp,
-                                                          self.origin - pulse_location - 3 * pulse.length,
-                                                          pulse.length), np.zeros(len(self.wtpts)),
-                                                 pulse.freq, pulse.phase)
-                    self.waveforms_qubit_I[ii] += pulse_waveform[0]
-                    self.waveforms_qubit_Q[ii] += pulse_waveform[1]
-                    self.markers_qubit_buffer[ii] += ap.square(self.mtpts, 1,
-                                                              self.origin - pulse_location - 6 * pulse.length - self.marker_start_buffer,
-                                                              6 * pulse.length + self.marker_start_buffer)
-
-                high_values_indices = self.markers_qubit_buffer[ii] > 1
-                self.markers_qubit_buffer[ii][high_values_indices] = 1
-
-                if pulse.type == "idle":
-                    pulse_recorded = True
+                if pulse_defined:
+                    self.waveforms_qubit_I[ii] += qubit_waveforms[0]
+                    self.waveforms_qubit_Q[ii] += qubit_waveforms[1]
+                    self.markers_qubit_buffer[ii] += qubit_marker
 
                 pulse_location += pulse.span_length
-                if pulse_recorded == False:
-                    raise ValueError('Pulse is not defined.')
 
         return (self.markers_readout,
                 self.markers_card,
                 self.waveforms_qubit_I,
                 self.waveforms_qubit_Q,
+                self.waveforms_qubit_flux,
                 self.markers_qubit_buffer )
