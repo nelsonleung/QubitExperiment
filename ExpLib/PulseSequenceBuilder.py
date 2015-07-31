@@ -18,7 +18,7 @@ class Pulse():
         self.span_length = span_length
 
 
-class TEK1PulseSequenceBuilder():
+class PulseSequenceBuilder():
     def __init__(self, pulse_cfg, readout_cfg,buffer_cfg):
         self.start_end_buffer = buffer_cfg['tek1_start_end']
         self.marker_start_buffer = buffer_cfg['marker_start']
