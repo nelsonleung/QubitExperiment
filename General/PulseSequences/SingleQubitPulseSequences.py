@@ -19,7 +19,7 @@ class RabiSequence(QubitPulseSequence):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.psb.append('general', self.pulse_type, amp=1, length=pt)
+        self.psb.append('q','general', self.pulse_type, amp=1, length=pt)
 
 
 class T1Sequence(QubitPulseSequence):
@@ -33,7 +33,7 @@ class T1Sequence(QubitPulseSequence):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.psb.append('pi', self.pulse_type)
+        self.psb.append('q','pi', self.pulse_type)
         self.psb.idle(pt)
 
 
@@ -48,9 +48,9 @@ class RamseySequence(QubitPulseSequence):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.psb.append('half_pi', self.pulse_type)
+        self.psb.append('q','half_pi', self.pulse_type)
         self.psb.idle(pt)
-        self.psb.append('half_pi', self.pulse_type)
+        self.psb.append('q','half_pi', self.pulse_type)
 
 
 class SpinEchoSequence(QubitPulseSequence):
@@ -64,11 +64,11 @@ class SpinEchoSequence(QubitPulseSequence):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.psb.append('half_pi', self.pulse_type)
+        self.psb.append('q','half_pi', self.pulse_type)
         self.psb.idle(pt/2.0)
-        self.psb.append('pi', self.pulse_type)
+        self.psb.append('q','pi', self.pulse_type)
         self.psb.idle(pt/2.0)
-        self.psb.append('half_pi', self.pulse_type)
+        self.psb.append('q','half_pi', self.pulse_type)
 
 
 class EFRabiSequence(QubitPulseSequence):
@@ -87,6 +87,6 @@ class EFRabiSequence(QubitPulseSequence):
 
     def define_pulses(self,pt):
         if self.expt_cfg['ge_pi']:
-            self.psb.append('pi', self.pulse_type)
-        self.psb.append('general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.ef_sideband_freq)
-        self.psb.append('pi', self.pulse_type)
+            self.psb.append('q','pi', self.pulse_type)
+        self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.ef_sideband_freq)
+        self.psb.append('q','pi', self.pulse_type)
