@@ -41,9 +41,6 @@ class PulseSequenceBuilder():
         Append a pulse in the pulse sequence.
         '''
         if target == "q":
-            pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
-            if self.flux_pulse_started:
-                self.pulse_span_length_list_temp.append(pulse_span_length)
             if name == "pi":
                 amp = self.pulse_cfg[type]['a']
                 length = self.pulse_cfg[type]['pi_length']
@@ -52,6 +49,10 @@ class PulseSequenceBuilder():
                 amp = self.pulse_cfg[type]['a']
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
+            pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
+            print pulse_span_length
+            if self.flux_pulse_started:
+                self.pulse_span_length_list_temp.append(pulse_span_length)
         elif target[:4] == "q,mm":
             self.flux_pulse_started = True
             mm_target = int(target[4])
