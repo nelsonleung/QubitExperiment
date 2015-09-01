@@ -50,11 +50,11 @@ class T1Experiment(QubitPulseSequenceExperiment):
                                                     post_run=self.post_run, **kwargs)
 
     def pre_run(self):
-        pass
+        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg[self.expt_cfg_name]['iq_freq'])
 
     def post_run(self, expt_pts, expt_avg_data):
         print "Analyzing T1 Data"
-        fitdata = fitexp(expt_pts, t1_avg_data)
+        fitdata = fitexp(expt_pts, expt_avg_data)
         print "T1: " + str(fitdata[3]) + " ns"
 
 
@@ -72,10 +72,19 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
     def post_run(self, expt_pts, expt_avg_data):
         print "Analyzing Ramsey Data"
         fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+        self.offset_freq =self.cfg['ramsey']['ramsey_freq'] - fitdata[1] * 1e9
+        self.flux_volt = self.cfg['freq_flux']['flux_volt']
+        self.freq_flux_slope = self.cfg['freq_flux']['slope']
+
         suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
         print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
         print "T2*: " + str(fitdata[3]) + " ns"
-        print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+        if round(self.offset_freq/ self.freq_flux_slope,4)==0.0000:
+            print "Qubit frequency is well calibrated."
+        else:
+            print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+            print "Or Suggested Flux Voltage: " +str(round(self.flux_volt -self.offset_freq/ self.freq_flux_slope,4))
 
 
 class SpinEchoExperiment(QubitPulseSequenceExperiment):
@@ -112,4 +121,30 @@ class EFRabiExperiment(QubitPulseSequenceExperiment):
     def post_run(self, expt_pts, expt_avg_data):
         pass
 
+class EFRamseyExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='EF_Ramsey', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=EFRamseySequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
 
+    def pre_run(self):
+        self.drive.set_frequency(
+            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] )
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass
+        #print "Analyzing Ramsey Data"
+        #fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+        #self.offset_freq =self.cfg['ramsey']['ramsey_freq'] - fitdata[1] * 1e9
+        #self.flux_volt = self.cfg['freq_flux']['flux_volt']
+        #self.freq_flux_slope = self.cfg['freq_flux']['slope']
+
+        #suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
+        #print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+        #print "T2*: " + str(fitdata[3]) + " ns"
+        #if round(self.offset_freq/ self.freq_flux_slope,4)==0.0000:
+         #   print "Qubit frequency is well calibrated."
+        #else:
+          #  print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+          #  print "Or Suggested Flux Voltage: " +str(round(self.flux_volt -self.offset_freq/ self.freq_flux_slope,4))

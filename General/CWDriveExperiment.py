@@ -34,7 +34,7 @@ class CWDriveExperiment(Experiment):
         self.drive.set_power(self.cfg['drive']['power'])
         self.drive.set_ext_pulse(mod=False)
 
-        self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
+        self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'],self.cfg[self.expt_cfg_name]['iq_offsets'])
 
         print "Prep Card"
         adc = Alazar(self.cfg['alazar'])

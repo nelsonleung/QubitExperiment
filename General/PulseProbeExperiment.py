@@ -35,12 +35,11 @@ class PulseProbeExperiment(Experiment):
         self.readout.set_frequency(self.cfg['readout']['frequency'])
         self.readout.set_power(self.cfg['readout']['power'])
         self.readout.set_ext_pulse(mod=True)
-        self.readout_shifter.set_phase(self.cfg['readout']['start_phase'] + self.cfg['readout']['phase_slope'] * (
-            self.cfg['readout']['frequency'] - self.cfg['readout']['bare_frequency']), self.cfg['readout']['frequency'])
+        self.readout_shifter.set_phase(self.cfg['readout']['start_phase']%360, self.cfg['readout']['frequency'])
 
 
         self.drive.set_power(self.cfg['drive']['power'])
-        self.drive.set_ext_pulse(mod=True)
+        self.drive.set_ext_pulse(mod=False)
         self.drive.set_output(True)
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
 

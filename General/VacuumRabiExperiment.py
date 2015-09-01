@@ -40,6 +40,7 @@ class VacuumRabiExperiment(Experiment):
         for freq in self.expt_pts:
             self.readout.set_frequency(freq)
             self.readout_shifter.set_phase((self.cfg['readout']['start_phase'] + self.cfg['readout']['phase_slope'] * (freq - self.cfg['readout']['frequency']))%360, freq)
+            print self.readout_shifter.get_phase()
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data()
 
             self.plotter.append_xy('readout_avg_freq_scan1', freq, mean(ch1_pts[0:]))

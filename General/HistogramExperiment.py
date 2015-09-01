@@ -40,7 +40,7 @@ class HistogramExperiment(Experiment):
 
         self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
         self.drive.set_power(self.cfg[self.expt_cfg_name]['power'])
-        self.drive.set_ext_pulse(mod=True)
+        self.drive.set_ext_pulse(mod=False)
         self.drive.set_output(True)
 
         self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])

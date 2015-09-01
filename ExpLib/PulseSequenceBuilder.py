@@ -50,7 +50,6 @@ class PulseSequenceBuilder():
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
             pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
-            print pulse_span_length
             if self.flux_pulse_started:
                 self.pulse_span_length_list_temp.append(pulse_span_length)
         elif target[:4] == "q,mm":

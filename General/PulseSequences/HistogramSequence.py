@@ -18,7 +18,7 @@ class HistogramSequence(PulseSequence):
         self.marker_start_buffer = buffer_cfg['marker_start']
 
         PulseSequence.__init__(self, "Histogram", awg_info, sequence_length=2)
-
+        self.pulse_cfg=pulse_cfg
         self.pulse_type = histo_cfg['pulse_type']
         self.a = pulse_cfg['a']
         self.pi_length = pulse_cfg['pi_length']
@@ -61,7 +61,7 @@ class HistogramSequence(PulseSequence):
                     ap.sideband(wtpts,
                                  ap.square(wtpts, a, self.origin - w - 2 * self.ramp_sigma , w,
                                             self.ramp_sigma), np.zeros(len(wtpts)),
-                                 0, 0)
+                                 self.pulse_cfg['iq_freq'], 0)
 
                 self.markers['qubit buffer'][ii] = ap.square(mtpts, 1,
                                                               self.origin - w - 4 * self.ramp_sigma - self.marker_start_buffer,
@@ -73,7 +73,7 @@ class HistogramSequence(PulseSequence):
                     ap.sideband(wtpts,
                                  ap.gauss(wtpts, a, self.origin - 3 * gauss_sigma , gauss_sigma),
                                  np.zeros(len(wtpts)),
-                                 0, 0)
+                                 self.pulse_cfg['iq_freq'], 0)
 
                 self.markers['qubit buffer'][ii] = ap.square(mtpts, 1, self.origin - 6 * gauss_sigma - self.marker_start_buffer ,
                                                               6 * gauss_sigma + self.marker_start_buffer)

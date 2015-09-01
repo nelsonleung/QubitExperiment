@@ -15,11 +15,11 @@ class QubitPulseSequenceExperiment(Experiment):
                  **kwargs):
         Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
-        extra_args={}
+        self.extra_args={}
         for key, value in kwargs.iteritems():
-            extra_args[key] = value
+            self.extra_args[key] = value
 
-        if 'prep_tek2' in extra_args:
+        if 'prep_tek2' in self.extra_args:
             self.prep_tek2 = extra_args['prep_tek2']
         else:
             self.prep_tek2 = False
@@ -57,9 +57,26 @@ class QubitPulseSequenceExperiment(Experiment):
 
         self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
         self.drive.set_power(self.cfg['drive']['power'])
-        self.drive.set_ext_pulse(mod=True)
+        self.drive.set_ext_pulse(mod=False)
         self.drive.set_output(True)
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
+
+        try:
+            self.cfg['freq_flux']['flux_volt']=self.extra_args['flux_volt']
+        except:
+            pass
+
+        try:
+            self.cfg['freq_flux']['slope']=self.extra_args['freq_flux_slope']
+        except:
+            pass
+
+        try:
+            self.cfg['freq_flux']['volt_offset']+=self.extra_args['volt_offset']
+        except:
+            pass
+
+        self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux_volt'])
 
         self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
 
