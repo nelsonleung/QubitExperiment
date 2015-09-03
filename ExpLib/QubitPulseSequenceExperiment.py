@@ -13,16 +13,42 @@ class QubitPulseSequenceExperiment(Experiment):
     '''
     def __init__(self, path='', prefix='SQPSE', config_file=None, PulseSequence=None, pre_run=None, post_run=None,
                  **kwargs):
-        Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
 
         self.extra_args={}
+
         for key, value in kwargs.iteritems():
             self.extra_args[key] = value
+            #print str(key) + ": " + str(value)
+
+        if 'liveplot_enabled' in self.extra_args:
+            self.liveplot_enabled = self.extra_args['liveplot_enabled']
+        else:
+            self.liveplot_enabled = True
+
+        Experiment.__init__(self, path=path, prefix=prefix, config_file=config_file, **kwargs)
+
+
 
         if 'prep_tek2' in self.extra_args:
-            self.prep_tek2 = extra_args['prep_tek2']
+            self.prep_tek2 = self.extra_args['prep_tek2']
         else:
             self.prep_tek2 = False
+
+
+        if 'adc' in self.extra_args:
+            self.adc = self.extra_args['adc']
+        else:
+            self.adc = None
+
+        if 'data_file' in self.extra_args:
+            self.data_file = self.extra_args['data_file']
+        else:
+            self.data_file = None
+
+        if 'flux_freq' in self.extra_args:
+            self.flux_freq = self.extra_args['flux_freq']
+        else:
+            self.flux_freq = None
 
         self.prefix = prefix
         self.expt_cfg_name = prefix.lower()
@@ -32,7 +58,7 @@ class QubitPulseSequenceExperiment(Experiment):
 
         self.pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
 
-        self.pulse_sequence = PulseSequence(prefix, self.cfg, self.cfg[self.expt_cfg_name])
+        self.pulse_sequence = PulseSequence(prefix, self.cfg, self.cfg[self.expt_cfg_name],**kwargs)
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
@@ -46,7 +72,8 @@ class QubitPulseSequenceExperiment(Experiment):
         return
 
     def go(self):
-        self.plotter.clear()
+        if self.liveplot_enabled:
+            self.plotter.clear()
 
         print "Prep Instruments"
         self.readout.set_frequency(self.cfg['readout']['frequency'])
@@ -83,8 +110,11 @@ class QubitPulseSequenceExperiment(Experiment):
         if self.pre_run is not None:
             self.pre_run()
 
-        print "Prep Card"
-        adc = Alazar(self.cfg['alazar'])
+        if self.adc==None:
+            print "Prep Card"
+            adc = Alazar(self.cfg['alazar'])
+        else:
+            adc = self.adc
 
         expt_data = None
         for ii in arange(max(1, self.cfg[self.expt_cfg_name]['averages'] / 100)):
@@ -96,15 +126,23 @@ class QubitPulseSequenceExperiment(Experiment):
             else:
                 expt_data = (expt_data * ii + ch1_pts) / (ii + 1.0)
 
-            self.plotter.plot_z(self.prefix + ' Data', expt_data.T)
+
             expt_avg_data = mean(expt_data, 1)
-            self.plotter.plot_xy(self.prefix + ' XY', self.pulse_sequence.expt_pts, expt_avg_data)
+            if self.liveplot_enabled:
+                self.plotter.plot_z(self.prefix + ' Data', expt_data.T)
+                self.plotter.plot_xy(self.prefix + ' XY', self.pulse_sequence.expt_pts, expt_avg_data)
 
             print ii * min(self.cfg[self.expt_cfg_name]['averages'], 100)
-            with self.datafile() as f:
+
+            if self.data_file != None:
+                self.slab_file = SlabFile(self.data_file)
+            else:
+                self.slab_file = self.datafile()
+            with self.slab_file as f:
                 f.add('expt_2d', expt_data)
                 f.add('expt_avg_data', expt_avg_data)
                 f.add('expt_pts', self.expt_pts)
+                f.close()
 
         if self.post_run is not None:
             self.post_run(self.expt_pts, expt_avg_data)

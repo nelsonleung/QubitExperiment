@@ -50,7 +50,8 @@ class T1Experiment(QubitPulseSequenceExperiment):
                                                     post_run=self.post_run, **kwargs)
 
     def pre_run(self):
-        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg[self.expt_cfg_name]['iq_freq'])
+        #self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+        pass
 
     def post_run(self, expt_pts, expt_avg_data):
         print "Analyzing T1 Data"
@@ -66,8 +67,7 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
 
     def pre_run(self):
         self.drive.set_frequency(
-            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] + self.cfg['ramsey'][
-                'ramsey_freq'])
+            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] + self.cfg['ramsey']['ramsey_freq'])
 
     def post_run(self, expt_pts, expt_avg_data):
         print "Analyzing Ramsey Data"
@@ -133,18 +133,34 @@ class EFRamseyExperiment(QubitPulseSequenceExperiment):
 
     def post_run(self, expt_pts, expt_avg_data):
         pass
-        #print "Analyzing Ramsey Data"
-        #fitdata = fitdecaysin(expt_pts, expt_avg_data)
+        print "Analyzing EF Ramsey Data"
+        fitdata = fitdecaysin(expt_pts, expt_avg_data)
 
         #self.offset_freq =self.cfg['ramsey']['ramsey_freq'] - fitdata[1] * 1e9
         #self.flux_volt = self.cfg['freq_flux']['flux_volt']
         #self.freq_flux_slope = self.cfg['freq_flux']['slope']
 
-        #suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
-        #print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
-        #print "T2*: " + str(fitdata[3]) + " ns"
+        suggested_anharm = self.cfg['qubit']['alpha'] + (+fitdata[1] * 1e9 - self.cfg['ef_ramsey']['ramsey_freq'])
+        print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+        print "T2*eg: " + str(fitdata[3]) + " ns"
         #if round(self.offset_freq/ self.freq_flux_slope,4)==0.0000:
          #   print "Qubit frequency is well calibrated."
         #else:
-          #  print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+        print "Suggested Anharmonicity: " + str(suggested_anharm)
           #  print "Or Suggested Flux Voltage: " +str(round(self.flux_volt -self.offset_freq/ self.freq_flux_slope,4))
+
+
+class EFT1Experiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='EF_T1', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=EFT1Sequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+
+    def post_run(self, expt_pts, expt_avg_data):
+        print "Analyzing EF T1 Data"
+        fitdata = fitexp(expt_pts, expt_avg_data)
+        print "EF T1: " + str(fitdata[3]) + " ns"
+

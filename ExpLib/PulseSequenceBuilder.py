@@ -63,6 +63,15 @@ class PulseSequenceBuilder():
                 flux_pulse_span_length += span_length_temp
             self.pulse_span_length_list_temp = []
             self.total_flux_pulse_span_length += flux_pulse_span_length
+        elif target[:4] == "q:mm":
+            self.flux_pulse_started = True
+            pulse_span_length = ap.get_pulse_span_length(self.cfg['flux_pulse_info'], type, length)
+            flux_pulse_span_length = pulse_span_length
+            for span_length_temp in self.pulse_span_length_list_temp:
+                flux_pulse_span_length += span_length_temp
+            self.pulse_span_length_list_temp = []
+            self.total_flux_pulse_span_length += flux_pulse_span_length
+
         else:
             raise ValueError('Wrong target has been defined')
 
@@ -202,6 +211,19 @@ class PulseSequenceBuilder():
                         flux_pulse_started = True
                     mm_target = int(pulse.target[4])
                     mm_target_info = self.cfg['multimodes'][mm_target]
+                    if pulse.type == "square":
+                        waveforms_qubit_flux = flux_square(self.ftpts, flux_pulse_location, pulse,
+                                                           self.cfg['flux_pulse_info'])
+                    elif pulse.type == "gauss":
+                        waveforms_qubit_flux = flux_gauss(self.ftpts, flux_pulse_location, pulse)
+                    else:
+                        raise ValueError('Wrong pulse type has been defined')
+                    if pulse_defined:
+                        self.waveforms_qubit_flux[ii] += waveforms_qubit_flux
+                elif pulse.target[:4] == "q:mm":
+                    if flux_pulse_started == False:
+                        flux_end_location = pulse_location
+                        flux_pulse_started = True
                     if pulse.type == "square":
                         waveforms_qubit_flux = flux_square(self.ftpts, flux_pulse_location, pulse,
                                                            self.cfg['flux_pulse_info'])

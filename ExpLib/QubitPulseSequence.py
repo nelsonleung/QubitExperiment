@@ -10,7 +10,7 @@ class QubitPulseSequence(PulseSequence):
     '''
     Parent class for all the single qubit pulse sequences.
     '''
-    def __init__(self, name, cfg, expt_cfg, define_points, define_parameters, define_pulses):
+    def __init__(self, name, cfg, expt_cfg, define_points, define_parameters, define_pulses, **kwargs):
 
         self.expt_cfg = expt_cfg
         define_points()
