@@ -17,6 +17,9 @@ class QubitPulseSequence(PulseSequence):
         define_parameters()
         sequence_length = len(self.expt_pts)
 
+        if (expt_cfg['use_pi_calibration']):
+            sequence_length+=2
+
         PulseSequence.__init__(self, name, cfg['awgs'], sequence_length)
 
         self.psb = PulseSequenceBuilder(cfg)

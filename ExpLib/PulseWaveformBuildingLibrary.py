@@ -33,7 +33,7 @@ def flux_square(ftpts,pulse_location,pulse,pulse_cfg):
                                      ap.square(ftpts, pulse.amp, pulse_location-pulse.length-3*pulse_cfg['square'][
                                                                   'ramp_sigma'] , pulse.length, pulse_cfg['square'][
                                                                   'ramp_sigma']), np.zeros(len(ftpts)),
-                                      pulse.freq, pulse.phase)[0]
+                                      pulse.freq, pulse.phase)[1]
     return waveforms_qubit_flux
 
 
@@ -42,5 +42,5 @@ def flux_gauss(ftpts,pulse_location,pulse):
                              ap.gauss(ftpts, pulse.amp,
                                       pulse_location - 3 * pulse.length,
                                       pulse.length), np.zeros(len(ftpts)),
-                             pulse.freq, pulse.phase)[0]
+                             pulse.freq, pulse.phase)[1]
     return waveforms_qubit_flux

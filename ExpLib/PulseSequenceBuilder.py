@@ -88,6 +88,7 @@ class PulseSequenceBuilder():
 
         self.pulse_sequence_list.append(pulse_info)
         self.total_pulse_span_length += length
+        self.total_flux_pulse_span_length += length
 
     def get_pulse_sequence(self):
         '''
