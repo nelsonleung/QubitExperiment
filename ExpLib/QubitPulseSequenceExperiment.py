@@ -65,6 +65,7 @@ class QubitPulseSequenceExperiment(Experiment):
         self.expt_pts = self.pulse_sequence.expt_pts
         self.cfg['alazar']['samplesPerRecord'] = 2 ** (self.cfg['readout']['width'] - 1).bit_length()
         self.cfg['alazar']['recordsPerBuffer'] = self.pulse_sequence.sequence_length
+
         self.cfg['alazar']['recordsPerAcquisition'] = int(
             self.pulse_sequence.sequence_length * min(self.cfg[self.expt_cfg_name]['averages'], 100))
 
@@ -121,16 +122,30 @@ class QubitPulseSequenceExperiment(Experiment):
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data_by_record(prep_function=self.awg_prep,
                                                                     start_function=self.awg.run,
                                                                     excise=self.cfg['readout']['window'])
-            if expt_data is None:
-                expt_data = ch1_pts
+
+            if not self.cfg[self.expt_cfg_name]['use_pi_calibration']:
+                if expt_data is None:
+                    expt_data = ch1_pts
+                else:
+                    expt_data = (expt_data * ii + ch1_pts) / (ii + 1.0)
+
             else:
-                expt_data = (expt_data * ii + ch1_pts) / (ii + 1.0)
+                zero_amp = mean(ch1_pts[-2])
+                pi_amp = mean(ch1_pts[-1])
+                current_data= (ch1_pts[:-2]-zero_amp)/(pi_amp-zero_amp)
+                if expt_data is None:
+                    expt_data = current_data
+                else:
+                    expt_data = (expt_data * ii + current_data) / (ii + 1.0)
 
 
             expt_avg_data = mean(expt_data, 1)
+
+
             if self.liveplot_enabled:
                 self.plotter.plot_z(self.prefix + ' Data', expt_data.T)
                 self.plotter.plot_xy(self.prefix + ' XY', self.pulse_sequence.expt_pts, expt_avg_data)
+
 
             print ii * min(self.cfg[self.expt_cfg_name]['averages'], 100)
 

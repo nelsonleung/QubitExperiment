@@ -4,7 +4,7 @@ import numpy as np
 
 
 def sideband(t, i, q, freq=0, phase=0):
-    return ( np.cos(2 * np.pi * (freq/1.0e9 * t )) * i - np.cos(2 * np.pi * (freq/1.0e9 * t)) * q,
+    return ( np.cos(2 * np.pi * (freq/1.0e9 * t )+ phase*np.pi/180.0) * i - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * q,
              np.cos(2 * np.pi * (freq/1.0e9 * t )+ phase*np.pi/180.0) * i + np.cos(2 * np.pi * (freq/1.0e9 * t ) + phase*np.pi/180.0) * q)
 
 

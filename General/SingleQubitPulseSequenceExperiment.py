@@ -68,6 +68,7 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
     def pre_run(self):
         self.drive.set_frequency(
             self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] + self.cfg['ramsey']['ramsey_freq'])
+        print self.cfg['pulse_info'][self.pulse_type]['iq_freq']
 
     def post_run(self, expt_pts, expt_avg_data):
         print "Analyzing Ramsey Data"

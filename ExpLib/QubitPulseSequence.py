@@ -34,6 +34,16 @@ class QubitPulseSequence(PulseSequence):
             total_pulse_span_length_list.append(self.psb.get_total_pulse_span_length())
             self.total_flux_pulse_span_length_list.append(self.psb.get_total_flux_pulse_span_length())
 
+        if (expt_cfg['use_pi_calibration']):
+            calibration_pts = [0,1]
+
+            for jj, pt in enumerate(calibration_pts):
+                if jj ==1:
+                    self.psb.append('q','pi', self.pulse_type)
+                self.pulse_sequence_matrix.append(self.psb.get_pulse_sequence())
+                total_pulse_span_length_list.append(self.psb.get_total_pulse_span_length())
+                self.total_flux_pulse_span_length_list.append(self.psb.get_total_flux_pulse_span_length())
+
         max_length = self.psb.get_max_length(total_pulse_span_length_list)
         max_flux_length = self.psb.get_max_flux_length(self.total_flux_pulse_span_length_list)
         self.set_all_lengths(max_length)

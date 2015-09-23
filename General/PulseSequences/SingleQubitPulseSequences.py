@@ -74,8 +74,8 @@ class EFRabiSequence(QubitPulseSequence):
         self.ef_sideband_freq = self.pulse_cfg[self.pulse_type]['iq_freq']-(self.qubit_cfg['frequency']-ef_freq)
 
     def define_pulses(self,pt):
-        if self.expt_cfg['ge_pi']:
-            self.psb.append('q','pi', self.pulse_type)
+        #if self.expt_cfg['ge_pi']:
+           #self.psb.append('q','pi', self.pulse_type)
         self.psb.append('q','general', self.ef_pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.ef_sideband_freq)
         #self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.ef_sideband_freq)
         self.psb.append('q','pi', self.pulse_type)
