@@ -5,7 +5,17 @@ import numpy as np
 
 def sideband(t, i, q, freq=0, phase=0):
     return ( np.cos(2 * np.pi * (freq/1.0e9 * t )+ phase*np.pi/180.0) * i - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * q,
-             np.cos(2 * np.pi * (freq/1.0e9 * t )+ phase*np.pi/180.0) * i + np.cos(2 * np.pi * (freq/1.0e9 * t ) + phase*np.pi/180.0) * q)
+             -np.sin(2 * np.pi * (freq/1.0e9 * t )+ phase*np.pi/180.0) * i - np.sin(2 * np.pi * (freq/1.0e9 * t ) + phase*np.pi/180.0) * q)
+
+
+def getFreq(time,time_array,pulse,freq,offset_fit_lin=0,offset_fit_quad=0):
+    #time is a point
+    #pulse is an array
+    time_idx = (np.abs(np.array(time_array)-time)).argmin()
+    print time_idx
+    offset = offset_fit_lin*pulse[time_idx]+offset_fit_quad*pulse[time_idx]**2
+    print offset
+    return freq-offset
 
 
 def gauss(t, a, t0, sigma):

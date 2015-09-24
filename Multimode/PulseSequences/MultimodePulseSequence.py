@@ -262,16 +262,16 @@ class MultimodeCPhaseQbitResTestSequence(QubitPulseSequence):
         #self.psb.append('q','pi', self.pulse_type)
         #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= pt)
 
-        self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length= 10.25,freq=self.expt_cfg['iq_freq'])
+        self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length= pt,freq=self.expt_cfg['iq_freq'])
         # self.psb.idle(10*1.41)
-        #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length=80, phase=0 )
+        self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length=63, phase=0 )
 
 
 
         #C-phase
-        #self.psb.append('q','general', "gauss" ,amp = 1,length = 24, freq=self.ef_sideband_freq)
-        #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= 184, phase= 0)
-        #self.psb.append('q','general', "gauss" ,amp = 1,length = 24, freq=self.ef_sideband_freq)
+        self.psb.append('q','general', "gauss" ,amp = 1,length = 14, freq=self.ef_sideband_freq)
+        self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= 136, phase= 0)
+        self.psb.append('q','general', "gauss" ,amp = 1,length = 14, freq=self.ef_sideband_freq)
         #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= self.multimode_cfg[1]['flux_pi_length'] , phase= 360.0*(self.multimode_cfg[1]['dc_offset_freq_ge'])*24*6/(1e9))
         #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= self.multimode_cfg[0]['flux_pi_length'] )
         #self.psb.append('q','general', "gauss" ,amp = 1,length = 54, freq=self.ef_sideband_freq)
@@ -279,7 +279,8 @@ class MultimodeCPhaseQbitResTestSequence(QubitPulseSequence):
         #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= 180)
         #self.psb.append('q','general', "gauss" ,amp = 1,length = 54, freq=self.ef_sideband_freq)
         #self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= self.multimode_cfg[1]['flux_pi_length'], phase=0)
-        self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=10.25,freq=self.expt_cfg['iq_freq'],phase= pt)
+        self.psb.append('q,mm1','general', self.flux_pulse_type, amp= self.multimode_cfg[1]['a'], length= 63, phase=0)
+        self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length = pt,freq=self.expt_cfg['iq_freq'],phase= 248)
 
 
         #self.psb.append('q','pi', self.pulse_type)
