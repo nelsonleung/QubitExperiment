@@ -33,7 +33,7 @@ def flux_square(ftpts,pulse_location,pulse,pulse_cfg):
                                      ap.square(ftpts, pulse.amp, pulse_location-pulse.length-3*pulse_cfg['square'][
                                                                   'ramp_sigma'] , pulse.length, pulse_cfg['square'][
                                                                   'ramp_sigma']), np.zeros(len(ftpts)),
-                                      pulse.freq, pulse.phase)[1]
+                                      pulse.freq, pulse.phase,offset=True)[1]
     return waveforms_qubit_flux
 
 
