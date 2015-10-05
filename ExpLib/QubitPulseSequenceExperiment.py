@@ -85,7 +85,7 @@ class QubitPulseSequenceExperiment(Experiment):
 
         self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
         self.drive.set_power(self.cfg['drive']['power'])
-        self.drive.set_ext_pulse(mod=False)
+        self.drive.set_ext_pulse(mod=True)
         self.drive.set_output(True)
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
 

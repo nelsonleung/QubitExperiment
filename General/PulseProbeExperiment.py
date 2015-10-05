@@ -39,7 +39,7 @@ class PulseProbeExperiment(Experiment):
 
 
         self.drive.set_power(self.cfg['drive']['power'])
-        self.drive.set_ext_pulse(mod=False)
+        self.drive.set_ext_pulse(mod=True)
         self.drive.set_output(True)
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
 
