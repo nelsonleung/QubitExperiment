@@ -56,6 +56,7 @@ class PulseProbeExperiment(Experiment):
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data()
 
             self.plotter.append_xy('avg_pulse_probe_freq_scan1', freq, mean(ch1_pts[0:]))
+            self.plotter.append_z('scope1',ch1_pts)
 
             with self.datafile() as f:
                 f.append_pt('freq', freq)
