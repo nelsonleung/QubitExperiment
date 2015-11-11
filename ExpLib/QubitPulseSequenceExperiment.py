@@ -123,11 +123,15 @@ class QubitPulseSequenceExperiment(Experiment):
                                                                     start_function=self.awg.run,
                                                                     excise=self.cfg['readout']['window'])
 
+            mag = sqrt(ch1_pts**2+ch2_pts**2)
+
             if not self.cfg[self.expt_cfg_name]['use_pi_calibration']:
                 if expt_data is None:
-                    expt_data = ch1_pts
+                    #expt_data = ch2_pts
+                    expt_data = mag
                 else:
-                    expt_data = (expt_data * ii + ch1_pts) / (ii + 1.0)
+                    expt_data = (expt_data * ii + mag) / (ii + 1.0)
+                    #expt_data = (expt_data * ii + ch2_pts) / (ii + 1.0)
 
             else:
                 zero_amp = mean(ch1_pts[-2])

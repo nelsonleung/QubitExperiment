@@ -44,11 +44,19 @@ class CWDriveExperiment(Experiment):
 
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data()
 
+            mag = sqrt(ch1_pts**2+ch2_pts**2)
+
             self.plotter.append_xy('avg_cw_drive_freq_scan1', freq, mean(ch1_pts[0:]))
+            self.plotter.append_xy('avg_cw_drive_freq_scan2', freq, mean(ch2_pts[0:]))
+            self.plotter.append_xy('avg_cw_drive_freq_scan_mag', freq, mean(mag[0:]))
+            self.plotter.append_z('scope1',ch1_pts)
+            self.plotter.append_z('scope2',ch2_pts)
+            self.plotter.append_z('scope_mag',mag)
 
             with self.datafile() as f:
                 f.append_pt('freq', freq)
                 f.append_pt('ch1_mean', mean(ch1_pts[0:]))
-
+                f.append_pt('ch2_mean', mean(ch2_pts[0:]))
+                f.append_pt('mag_mean', mean(mag[0:]))
 
 

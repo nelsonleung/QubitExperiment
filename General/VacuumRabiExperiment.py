@@ -12,6 +12,8 @@ class VacuumRabiExperiment(Experiment):
 
         self.expt_cfg_name = prefix.lower()
 
+
+
         self.pulse_sequence = VacuumRabiSequence(self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'], self.cfg['buffer'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)

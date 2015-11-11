@@ -25,7 +25,7 @@ class VacuumRabiSequence(PulseSequence):
         self.card_trig_width = readout_cfg['card_trig_width']
 
 
-        self.max_length = round_samples((self.measurement_delay + self.measurement_width + 2*self.start_end_buffer))
+        self.max_length = round_samples((self.measurement_delay + self.measurement_width + 2*self.start_end_buffer+self.card_delay+self.card_trig_width))
         self.origin = self.max_length - (self.measurement_delay + self.measurement_width + self.start_end_buffer)
 
         self.set_all_lengths(self.max_length)
@@ -44,8 +44,6 @@ class VacuumRabiSequence(PulseSequence):
                                                       self.origin - self.card_delay + self.measurement_delay,
                                                       self.card_trig_width)
 
-        pulse_probe_len = self.pulse_probe_len
-        a = self.a
 
 
     def reshape_data(self, data):
