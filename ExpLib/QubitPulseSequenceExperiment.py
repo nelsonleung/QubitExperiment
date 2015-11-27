@@ -90,7 +90,7 @@ class QubitPulseSequenceExperiment(Experiment):
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
 
         try:
-            self.cfg['freq_flux']['flux_volt']=self.extra_args['flux_volt']
+            self.cfg['freq_flux']['flux']=self.extra_args['flux']
         except:
             pass
 
@@ -100,11 +100,15 @@ class QubitPulseSequenceExperiment(Experiment):
             pass
 
         try:
-            self.cfg['freq_flux']['volt_offset']+=self.extra_args['volt_offset']
+            self.cfg['freq_flux']['flux_offset']+=self.extra_args['flux_offset']
         except:
             pass
 
-        self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux_volt'])
+
+        if self.cfg['freq_flux']['current']:
+            self.flux_volt.ramp_current(self.cfg['freq_flux']['flux_current'])
+        elif self.cfg['freq_flux']['voltage']:
+            self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux_volt'])
 
         self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
 
@@ -127,11 +131,18 @@ class QubitPulseSequenceExperiment(Experiment):
 
             if not self.cfg[self.expt_cfg_name]['use_pi_calibration']:
                 if expt_data is None:
-                    #expt_data = ch2_pts
-                    expt_data = mag
+                    if self.cfg['readout']['channel']==1:
+                        expt_data = ch1_pts
+                    elif self.cfg['readout']['channel']==2:
+                        expt_data = ch2_pts
+                    # expt_data = mag
                 else:
-                    expt_data = (expt_data * ii + mag) / (ii + 1.0)
-                    #expt_data = (expt_data * ii + ch2_pts) / (ii + 1.0)
+                    if self.cfg['readout']['channel']==1:
+                        expt_data = (expt_data * ii + ch1_pts) / (ii + 1.0)
+                    elif self.cfg['readout']['channel']==2:
+                        expt_data = (expt_data * ii + ch2_pts) / (ii + 1.0)
+                    # expt_data = (expt_data * ii + mag) / (ii + 1.0)
+
 
             else:
                 zero_amp = mean(ch1_pts[-2])

@@ -51,6 +51,7 @@ class T1Experiment(QubitPulseSequenceExperiment):
 
     def pre_run(self):
         #self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+
         pass
 
     def post_run(self, expt_pts, expt_avg_data):
@@ -75,8 +76,12 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
         fitdata = fitdecaysin(expt_pts, expt_avg_data)
 
         self.offset_freq =self.cfg['ramsey']['ramsey_freq'] - fitdata[1] * 1e9
-        self.flux_volt = self.cfg['freq_flux']['flux_volt']
-        self.freq_flux_slope = self.cfg['freq_flux']['slope']
+        if self.cfg['freq_flux']['voltage']:
+            self.flux = self.cfg['freq_flux']['flux_volt']
+            self.freq_flux_slope = self.cfg['freq_flux']['freq_volt_slope']
+        elif self.cfg['freq_flux']['current']:
+            self.flux = self.cfg['freq_flux']['flux_current']
+            self.freq_flux_slope = self.cfg['freq_flux']['freq_current_slope']
 
         suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
         print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
@@ -181,6 +186,7 @@ class RabiSweepExperiment(QubitPulseSequenceExperiment):
     def pre_run(self):
         self.drive.set_frequency(self.drive_freq)
 
+
     def post_run(self, expt_pts, expt_avg_data):
         #print self.data_file
         slab_file = SlabFile(self.data_file)
@@ -190,4 +196,5 @@ class RabiSweepExperiment(QubitPulseSequenceExperiment):
             f.append_line('sweep_expt_pts', expt_pts)
 
             f.close()
+
 

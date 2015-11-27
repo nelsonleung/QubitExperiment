@@ -3,15 +3,15 @@ __author__ = 'dave'
 import numpy as np
 
 
-def sideband(t, i, q, freq=0, phase=0, offset=False):
+def sideband(t, i, q, freq=0, phase=0, offset=False, offset_fit_lin=0,offset_fit_quad=0):
     if offset:
         if (not max(i) == 0):
             time_step = t[1]-t[0]
-            freq_calibrated = getFreq(i,freq/10,6*0.0658e9,0.06748e9);
+            freq_calibrated = getFreq(i,freq,offset_fit_lin,offset_fit_quad);
             freq_integ_array = np.cumsum(freq_calibrated)*time_step
-            np.savetxt('time.out', t, delimiter=',')
-        return ( np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * i - np.cos(2 * np.pi * (np.multiply(getFreq(q,freq,0.0658e9,0.06748e9)/1.0e9, t )) + phase*np.pi/180.0) * q,
-             -np.sin(2 * np.pi * (freq_integ_array/1.0e9)+ phase*np.pi/180.0) * i - np.sin(2 * np.pi * (np.multiply(getFreq(q,freq,0.0658e9,0.06748e9)/1.0e9, t )) + phase*np.pi/180.0) * q)
+            # np.savetxt('time.out', t, delimiter=',')
+        return ( np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * i - np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * q,
+             -np.sin(2 * np.pi * (freq_integ_array/1.0e9)+ phase*np.pi/180.0) * i - np.sin(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * q)
     else:
         return ( np.cos(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * i - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * q,
              -np.sin(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * i - np.sin(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * q)
@@ -22,22 +22,16 @@ def getFreq(pulse,freq,offset_fit_lin=0,offset_fit_quad=0):
     #time is a point
     #pulse is an array
 
-    # print max(pulse)
-    # print time_idx
-    # print pulse[time_idx]
-    #print time_idx
     abs_pulse = abs(pulse)
     max_a = max(abs_pulse)
-    print max_a
-    print len(pulse)
 
     freq_list = freq + (offset_fit_lin*abs_pulse+offset_fit_quad*abs_pulse**2) - (offset_fit_lin*max_a+offset_fit_quad*max_a**2)
-    # print offset
-    # print len(pulse)
     freq_array = np.array(freq_list)
-    if (not max_a == 0):
-        np.savetxt('freq.out', freq_array, delimiter=',')
-        np.savetxt('pulse.out', pulse, delimiter=',')
+
+    ## This saves the freq and pulse data for the churpped pulse for analysis
+    # if (not max_a == 0):
+    #     np.savetxt('freq.out', freq_array, delimiter=',')
+    #     np.savetxt('pulse.out', pulse, delimiter=',')
     # print "done"
     return freq_array
 

@@ -14,7 +14,7 @@ class VacuumRabiExperiment(Experiment):
 
 
 
-        self.pulse_sequence = VacuumRabiSequence(self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'], self.cfg['buffer'])
+        self.pulse_sequence = VacuumRabiSequence(self.cfg['awgs'], self.cfg[self.expt_cfg_name], self.cfg['readout'], self.cfg['buffer'], self.cfg['pulse_info'])
         self.pulse_sequence.build_sequence()
         self.pulse_sequence.write_sequence(os.path.join(self.path, '../sequences/'), prefix, upload=True)
 
@@ -37,13 +37,15 @@ class VacuumRabiExperiment(Experiment):
         else:
             self.readout.set_ext_pulse(mod=False)
 
-        # self.drive.set_output(True)
-        if (self.cfg[self.expt_cfg_name]['drive']):
+        if (self.cfg[self.expt_cfg_name]['pi_pulse']):
             self.drive.set_output(True)
+            self.drive.set_ext_pulse(mod=True)
         else:
             self.drive.set_output(False)
+            self.drive.set_ext_pulse(mod=False)
 
-        self.drive.set_ext_pulse(mod=False)
+
+        # self.drive.set_ext_pulse(mod=False)
         self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
 
         self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])

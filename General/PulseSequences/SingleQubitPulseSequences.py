@@ -143,6 +143,7 @@ class T1Sequence(QubitPulseSequence):
     def define_pulses(self,pt):
         self.psb.append('q','pi', self.pulse_type)
         self.psb.idle(pt)
+        #self.psb.append('q','pi', self.pulse_type)
 
 class RabiSweepSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg, **kwargs):
@@ -159,3 +160,7 @@ class RabiSweepSequence(QubitPulseSequence):
 
     def define_pulses(self,pt):
         self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.expt_cfg['iq_freq'])
+
+
+
+

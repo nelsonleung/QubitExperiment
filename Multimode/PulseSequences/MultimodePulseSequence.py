@@ -68,12 +68,13 @@ class MultimodeRamseySequence(QubitPulseSequence):
         #print self.expt_cfg['iq_freq']
 
     def define_pulses(self,pt):
+        ##to do: change the index of mm easier
         self.psb.append('q','half_pi', self.pulse_type)
         self.psb.append('q,mm1','general', self.flux_pulse_type, amp=self.multimode_cfg[1]['a'], length=  self.multimode_cfg[1]['flux_pi_length'])
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=0, length= pt)
         self.psb.idle(pt)
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.expt_cfg['pi_sb_ge'])
-        self.psb.append('q,mm1','general', self.flux_pulse_type, amp=self.multimode_cfg[1]['a'], length= self.multimode_cfg[1]['flux_pi_length'],phase = 360.0*self.expt_cfg['offset_f']*pt/(1e9) )
+        self.psb.append('q,mm1','general', self.flux_pulse_type, amp=self.multimode_cfg[1]['a'], length= self.multimode_cfg[1]['flux_pi_length'],phase = 360.0*self.multimode_cfg[1]['dc_offset_freq']*pt/(1e9) )
         self.psb.append('q','half_pi', self.pulse_type)
         #self.psb.append('q','half_pi', self.pulse_type, phase = 360.0*self.expt_cfg['offset_f']*pt/(1e9))
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.expt_cfg['half_pi_sb_ge'])
@@ -130,7 +131,6 @@ class MultimodeRabiSweepSequence(QubitPulseSequence):
         self.psb.append('q','pi', self.pulse_type)
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length=pt)
         self.psb.append('q:mm','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.flux_freq)
-        print self.expt_cfg['a']
 
 class MultimodeEFRabiSweepSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg, **kwargs):
@@ -184,7 +184,7 @@ class MultimodeT1Sequence(QubitPulseSequence):
         self.psb.append('q,mm1','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.multimode_cfg[1]['flux_pi_length'])
         self.psb.idle(pt)
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.expt_cfg['pi_sb_ge'])
-        self.psb.append('q,mm1','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.multimode_cfg[1]['flux_pi_length'],phase = 360.0*(self.multimode_cfg[1]['dc_offset_freq_ge'])*pt/(1e9))
+        self.psb.append('q,mm1','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.multimode_cfg[1]['flux_pi_length'],phase= 360.0*self.multimode_cfg[1]['dc_offset_freq']*pt/(1e9))
         #self.psb.append('q,mm0','pi', self.pulse_type)
 
 
