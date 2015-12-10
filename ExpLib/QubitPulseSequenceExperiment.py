@@ -95,7 +95,7 @@ class QubitPulseSequenceExperiment(Experiment):
             pass
 
         try:
-            self.cfg['freq_flux']['slope']=self.extra_args['freq_flux_slope']
+            self.cfg['freq_flux']['freq_flux_slope']=self.extra_args['freq_flux_slope']
         except:
             pass
 
@@ -106,9 +106,9 @@ class QubitPulseSequenceExperiment(Experiment):
 
 
         if self.cfg['freq_flux']['current']:
-            self.flux_volt.ramp_current(self.cfg['freq_flux']['flux_current'])
+            self.flux_volt.ramp_current(self.cfg['freq_flux']['flux'])
         elif self.cfg['freq_flux']['voltage']:
-            self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux_volt'])
+            self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux'])
 
         self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
 

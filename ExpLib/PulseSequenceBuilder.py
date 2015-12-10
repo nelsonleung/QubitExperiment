@@ -54,7 +54,7 @@ class PulseSequenceBuilder():
                 self.pulse_span_length_list_temp.append(pulse_span_length)
         elif target[:4] == "q,mm":
             self.flux_pulse_started = True
-            mm_target = int(target[4])
+            mm_target = int(target[4:])
             mm_target_info = self.cfg['multimodes'][mm_target]
             freq=mm_target_info['flux_pulse_freq']
             pulse_span_length = ap.get_pulse_span_length(self.cfg['flux_pulse_info'], type, length)

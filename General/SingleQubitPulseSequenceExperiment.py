@@ -76,21 +76,16 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
         fitdata = fitdecaysin(expt_pts, expt_avg_data)
 
         self.offset_freq =self.cfg['ramsey']['ramsey_freq'] - fitdata[1] * 1e9
-        if self.cfg['freq_flux']['voltage']:
-            self.flux = self.cfg['freq_flux']['flux_volt']
-            self.freq_flux_slope = self.cfg['freq_flux']['freq_volt_slope']
-        elif self.cfg['freq_flux']['current']:
-            self.flux = self.cfg['freq_flux']['flux_current']
-            self.freq_flux_slope = self.cfg['freq_flux']['freq_current_slope']
+
+        self.flux = self.cfg['freq_flux']['flux']
+        self.freq_flux_slope = self.cfg['freq_flux']['freq_flux_slope']
 
         suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
         print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
         print "T2*: " + str(fitdata[3]) + " ns"
-        if round(self.offset_freq/ self.freq_flux_slope,4)==0.0000:
-            print "Qubit frequency is well calibrated."
-        else:
-            print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
-            print "Or Suggested Flux Voltage: " +str(round(self.flux_volt -self.offset_freq/ self.freq_flux_slope,4))
+
+        print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+        print "Or Suggested Flux: " +str(self.flux -self.offset_freq/ self.freq_flux_slope)
 
 
 class SpinEchoExperiment(QubitPulseSequenceExperiment):
@@ -148,7 +143,7 @@ class EFRamseyExperiment(QubitPulseSequenceExperiment):
 
         suggested_anharm = self.cfg['qubit']['alpha'] + (+fitdata[1] * 1e9 - self.cfg['ef_ramsey']['ramsey_freq'])
         print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
-        print "T2*eg: " + str(fitdata[3]) + " ns"
+        print "T2*ef: " + str(fitdata[3]) + " ns"
         #if round(self.offset_freq/ self.freq_flux_slope,4)==0.0000:
          #   print "Qubit frequency is well calibrated."
         #else:
@@ -169,6 +164,51 @@ class EFT1Experiment(QubitPulseSequenceExperiment):
         print "Analyzing EF T1 Data"
         fitdata = fitexp(expt_pts, expt_avg_data)
         print "EF T1: " + str(fitdata[3]) + " ns"
+
+
+class EFT1Experiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='EF_T1', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=EFT1Sequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+
+    def post_run(self, expt_pts, expt_avg_data):
+        print "Analyzing EF T1 Data"
+        fitdata = fitexp(expt_pts, expt_avg_data)
+        print "EF T1: " + str(fitdata[3]) + " ns"
+
+
+class EFT1Experiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='EF_T1', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=EFT1Sequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+
+    def post_run(self, expt_pts, expt_avg_data):
+        print "Analyzing EF T1 Data"
+        fitdata = fitexp(expt_pts, expt_avg_data)
+        print "EF T1: " + str(fitdata[3]) + " ns"
+
+
+class HalfPiXPulseOptimizationExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='HalfPiXPulseOptimization', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=HalfPiXPulseOptimizationSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        #self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
+
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass
 
 
 class RabiSweepExperiment(QubitPulseSequenceExperiment):

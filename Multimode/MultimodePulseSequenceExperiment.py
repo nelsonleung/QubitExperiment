@@ -40,7 +40,15 @@ class MultimodeRamseyExperiment(QubitPulseSequenceExperiment):
         self.tek2 = InstrumentManager()["TEK2"]
 
     def post_run(self, expt_pts, expt_avg_data):
-        pass
+        print "Analyzing Ramsey Data"
+        fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+        self.offset_freq =self.cfg['multimode_ramsey']['ramsey_freq'] - fitdata[1] * 1e9
+
+        suggested_offset_freq = self.cfg['multimodes'][int(self.cfg['multimode_ramsey']['id'])]['dc_offset_freq'] - (fitdata[1] * 1e9 - self.cfg['multimode_ramsey']['ramsey_freq'])
+        print "Suggested offset frequency: " + str(suggested_offset_freq)
+        print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+        print "T2*: " + str(fitdata[3]) + " ns"
 
 
 class MultimodeEFRamseyExperiment(QubitPulseSequenceExperiment):
