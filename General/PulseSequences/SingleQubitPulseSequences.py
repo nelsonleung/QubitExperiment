@@ -188,6 +188,53 @@ class HalfPiXPulseOptimizationSweepSequence(QubitPulseSequence):
             self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'])
             i += 1
 
+
+class PiXPulseOptimizationSequence(QubitPulseSequence):
+    def __init__(self,name, cfg, expt_cfg,**kwargs):
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        n = pt
+        i = 0
+        self.psb.append('q','half_pi', self.pulse_type)
+        while i< n:
+            self.psb.append('q','pi', self.pulse_type)
+            i += 1
+
+
+class PiXPulseOptimizationSweepSequence(QubitPulseSequence):
+    def __init__(self,name, cfg, expt_cfg,**kwargs):
+        self.pulse_cfg = cfg['pulse_info']
+        self.expt_cfg = expt_cfg
+        self.extra_args={}
+        for key, value in kwargs.iteritems():
+            self.extra_args[key] = value
+            #print str(key) + ": " + str(value)
+        self.pulse_length = self.extra_args['pulse_length']
+
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        n = pt
+        i = 0
+        self.psb.append('q','half_pi', self.pulse_type)
+        while i< n:
+            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'])
+            i += 1
+
+
 class RabiSweepSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg, **kwargs):
         self.pulse_cfg = cfg['pulse_info']
