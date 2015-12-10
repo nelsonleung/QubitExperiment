@@ -17,6 +17,9 @@ class QubitPulseSequence(PulseSequence):
         define_parameters()
         sequence_length = len(self.expt_pts)
 
+        if "multimode" not in name:
+            cfg['awgs'][1]['upload'] = False
+
         if (expt_cfg['use_pi_calibration']):
             sequence_length+=2
 
