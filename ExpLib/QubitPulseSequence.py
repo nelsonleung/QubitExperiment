@@ -43,6 +43,8 @@ class QubitPulseSequence(PulseSequence):
             calibration_pts = [0,1]
 
             for jj, pt in enumerate(calibration_pts):
+                if jj ==0:
+                    self.psb.idle(10)
                 if jj ==1:
                     self.psb.append('q','pi', self.pulse_type)
                 self.pulse_sequence_matrix.append(self.psb.get_pulse_sequence())

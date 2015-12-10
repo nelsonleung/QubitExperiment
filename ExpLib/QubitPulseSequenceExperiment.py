@@ -122,32 +122,36 @@ class QubitPulseSequenceExperiment(Experiment):
             adc = self.adc
 
         expt_data = None
+        current_data = None
         for ii in arange(max(1, self.cfg[self.expt_cfg_name]['averages'] / 100)):
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data_by_record(prep_function=self.awg_prep,
                                                                     start_function=self.awg.run,
                                                                     excise=self.cfg['readout']['window'])
 
             mag = sqrt(ch1_pts**2+ch2_pts**2)
-
             if not self.cfg[self.expt_cfg_name]['use_pi_calibration']:
+
                 if expt_data is None:
                     if self.cfg['readout']['channel']==1:
                         expt_data = ch1_pts
                     elif self.cfg['readout']['channel']==2:
                         expt_data = ch2_pts
-                    # expt_data = mag
                 else:
                     if self.cfg['readout']['channel']==1:
                         expt_data = (expt_data * ii + ch1_pts) / (ii + 1.0)
                     elif self.cfg['readout']['channel']==2:
                         expt_data = (expt_data * ii + ch2_pts) / (ii + 1.0)
-                    # expt_data = (expt_data * ii + mag) / (ii + 1.0)
 
 
             else:
-                zero_amp = mean(ch1_pts[-2])
-                pi_amp = mean(ch1_pts[-1])
-                current_data= (ch1_pts[:-2]-zero_amp)/(pi_amp-zero_amp)
+                if self.cfg['readout']['channel']==1:
+                    zero_amp = mean(ch1_pts[-2])
+                    pi_amp = mean(ch1_pts[-1])
+                    current_data= (ch1_pts[:-2]-zero_amp)/(pi_amp-zero_amp)
+                elif self.cfg['readout']['channel']==2:
+                    zero_amp = mean(ch2_pts[-2])
+                    pi_amp = mean(ch2_pts[-1])
+                    current_data= (ch2_pts[:-2]-zero_amp)/(pi_amp-zero_amp)
                 if expt_data is None:
                     expt_data = current_data
                 else:
