@@ -244,7 +244,9 @@ class PulseSequenceBuilder():
                 if flux_pulse_started:
                     flux_pulse_location -= pulse.span_length
 
-            self.markers_ch3m1[ii] = ap.square(self.mtpts, 1,
+
+            if not flux_end_location ==0:
+                self.markers_ch3m1[ii] = ap.square(self.mtpts, 1,
                                                 self.origin - flux_end_location - total_pulse_span_length_list[
                                                     ii] - self.tek2_trigger_delay,
                                                 self.card_trig_width)
