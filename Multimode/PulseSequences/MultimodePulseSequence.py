@@ -77,7 +77,7 @@ class MultimodeRamseySequence(QubitPulseSequence):
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=0, length= pt)
         self.psb.idle(pt)
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.expt_cfg['pi_sb_ge'])
-        self.psb.append('q,mm'+str(self.id),'general', self.flux_pulse_type, amp=self.multimode_cfg[int(+self.id)]['a'], length= self.multimode_cfg[int(self.id)]['flux_pi_length'],phase = 360.0*self.phase_freq*pt/(1e9) )
+        self.psb.append('q,mm'+str(self.id),'general', self.flux_pulse_type, amp=self.multimode_cfg[int(+self.id)]['a'], length= self.multimode_cfg[int(self.id)]['flux_pi_length'],phase = 360.0*self.phase_freq*pt/(1.0e9) )
         self.psb.append('q','half_pi', self.pulse_type)
         #self.psb.append('q','half_pi', self.pulse_type, phase = 360.0*self.expt_cfg['offset_f']*pt/(1e9))
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.expt_cfg['half_pi_sb_ge'])
@@ -188,7 +188,7 @@ class MultimodeT1Sequence(QubitPulseSequence):
         self.psb.append('q,mm'+str(self.id),'general', self.flux_pulse_type, amp=self.multimode_cfg[int(+self.id)]['a'], length= self.multimode_cfg[int(self.id)]['flux_pi_length'])
         self.psb.idle(pt)
         #self.psb.append('q,mm0','general', self.flux_pulse_type, amp=self.expt_cfg['a'], length= self.expt_cfg['pi_sb_ge'])
-        self.psb.append('q,mm'+str(self.id),'general', self.flux_pulse_type, amp=self.multimode_cfg[int(+self.id)]['a'], length= self.multimode_cfg[int(self.id)]['flux_pi_length'],phase= 360.0*self.multimode_cfg[int(self.id)]['dc_offset_freq']*pt/(1e9))
+        self.psb.append('q,mm'+str(self.id),'general', self.flux_pulse_type, amp=self.multimode_cfg[int(+self.id)]['a'], length= self.multimode_cfg[int(self.id)]['flux_pi_length'],phase= 360.0*self.multimode_cfg[int(self.id)]['dc_offset_freq']*pt/(1.0e9))
         #self.psb.append('q,mm0','pi', self.pulse_type)
 
 

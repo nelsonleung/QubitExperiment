@@ -68,7 +68,7 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
 
     def pre_run(self):
         self.drive.set_frequency(
-            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'] + self.cfg['ramsey']['ramsey_freq'])
+            self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
         print self.cfg['pulse_info'][self.pulse_type]['iq_freq']
 
     def post_run(self, expt_pts, expt_avg_data):
@@ -251,6 +251,19 @@ class PiYOptimizationExperiment(QubitPulseSequenceExperiment):
     def __init__(self, path='', prefix='HalfPiYOptimization', config_file='..\\config.json', **kwargs):
         QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
                                                     PulseSequence=PiYOptimizationSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass
+
+
+class TomographyExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='Tomography', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=TomographySequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
 
     def pre_run(self):

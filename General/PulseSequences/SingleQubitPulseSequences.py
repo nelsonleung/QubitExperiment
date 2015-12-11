@@ -37,7 +37,7 @@ class RamseySequence(QubitPulseSequence):
     def define_pulses(self,pt):
         self.psb.append('q','half_pi', self.pulse_type)
         self.psb.idle(pt)
-        self.psb.append('q','half_pi', self.pulse_type)
+        self.psb.append('q','half_pi', self.pulse_type, phase = 360.0*self.expt_cfg['ramsey_freq']*pt/(1.0e9))
 
 
 class SpinEchoSequence(QubitPulseSequence):
@@ -258,6 +258,34 @@ class PiYOptimizationSequence(QubitPulseSequence):
         while i< n:
             self.psb.append('q','pi_y', self.pulse_type)
             i += 1
+
+
+class TomographySequence(QubitPulseSequence):
+    def __init__(self,name, cfg, expt_cfg,**kwargs):
+        self.pulse_cfg = cfg['pulse_info']
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = np.array([0,1,2])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        ### Initiate states
+        self.psb.append('q','half_pi_y', self.pulse_type)
+
+
+        ### gates before measurement for tomography
+        if pt == 0:
+            # <X>
+            self.psb.append('q','half_pi', self.pulse_type)
+        elif pt == 1:
+            # <Y>
+            self.psb.append('q','half_pi_y', self.pulse_type)
+        elif pt == 2:
+            # <Z>
+            pass
 
 
 class HalfPiYOptimizationSweepSequence(QubitPulseSequence):
