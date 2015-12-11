@@ -145,7 +145,7 @@ class T1Sequence(QubitPulseSequence):
         self.psb.idle(pt)
 
 
-class HalfPiXPulseOptimizationSequence(QubitPulseSequence):
+class HalfPiXOptimizationSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
         QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
@@ -163,7 +163,7 @@ class HalfPiXPulseOptimizationSequence(QubitPulseSequence):
             i += 1
 
 
-class HalfPiXPulseOptimizationSweepSequence(QubitPulseSequence):
+class HalfPiXOptimizationSweepSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
         self.pulse_cfg = cfg['pulse_info']
         self.expt_cfg = expt_cfg
@@ -189,7 +189,7 @@ class HalfPiXPulseOptimizationSweepSequence(QubitPulseSequence):
             i += 1
 
 
-class PiXPulseOptimizationSequence(QubitPulseSequence):
+class PiXOptimizationSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
         QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
@@ -207,8 +207,67 @@ class PiXPulseOptimizationSequence(QubitPulseSequence):
             self.psb.append('q','pi', self.pulse_type)
             i += 1
 
+class HalfPiYPhaseOptimizationSequence(QubitPulseSequence):
+    def __init__(self,name, cfg, expt_cfg,**kwargs):
+        self.pulse_cfg = cfg['pulse_info']
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
-class PiXPulseOptimizationSweepSequence(QubitPulseSequence):
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        self.psb.append('q','half_pi', self.pulse_type)
+        self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_cfg[self.pulse_type]['half_pi_length'],freq=self.pulse_cfg[self.pulse_type]['iq_freq'],phase=pt)
+
+class HalfPiYOptimizationSequence(QubitPulseSequence):
+    def __init__(self,name, cfg, expt_cfg,**kwargs):
+        self.pulse_cfg = cfg['pulse_info']
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        n = 2*pt+1
+        i = 0
+        while i< n:
+            self.psb.append('q','half_pi_y', self.pulse_type)
+            i += 1
+
+
+class HalfPiYOptimizationSweepSequence(QubitPulseSequence):
+    def __init__(self,name, cfg, expt_cfg,**kwargs):
+        self.pulse_cfg = cfg['pulse_info']
+        self.expt_cfg = expt_cfg
+        self.extra_args={}
+        for key, value in kwargs.iteritems():
+            self.extra_args[key] = value
+            #print str(key) + ": " + str(value)
+        self.pulse_length = self.extra_args['pulse_length']
+
+        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
+
+    def define_points(self):
+        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+
+    def define_parameters(self):
+        self.pulse_type =  self.expt_cfg['pulse_type']
+
+    def define_pulses(self,pt):
+        n = 2*pt+1
+        i = 0
+        while i< n:
+            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'],phase=self.pulse_cfg[self.pulse_type]['y_phase'])
+            i += 1
+
+
+class PiXOptimizationSweepSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
         self.pulse_cfg = cfg['pulse_info']
         self.expt_cfg = expt_cfg

@@ -196,10 +196,10 @@ class EFT1Experiment(QubitPulseSequenceExperiment):
         print "EF T1: " + str(fitdata[3]) + " ns"
 
 
-class HalfPiXPulseOptimizationExperiment(QubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='HalfPiXPulseOptimization', config_file='..\\config.json', **kwargs):
+class HalfPiXOptimizationExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='HalfPiXOptimization', config_file='..\\config.json', **kwargs):
         QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=HalfPiXPulseOptimizationSequence, pre_run=self.pre_run,
+                                                    PulseSequence=HalfPiXOptimizationSequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
 
     def pre_run(self):
@@ -209,10 +209,10 @@ class HalfPiXPulseOptimizationExperiment(QubitPulseSequenceExperiment):
         pass
 
 
-class PiXPulseOptimizationExperiment(QubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='PiXPulseOptimization', config_file='..\\config.json', **kwargs):
+class PiXOptimizationExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='PiXOptimization', config_file='..\\config.json', **kwargs):
         QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=PiXPulseOptimizationSequence, pre_run=self.pre_run,
+                                                    PulseSequence=PiXOptimizationSequence, pre_run=self.pre_run,
                                                     post_run=self.post_run, **kwargs)
 
     def pre_run(self):
@@ -221,6 +221,101 @@ class PiXPulseOptimizationExperiment(QubitPulseSequenceExperiment):
     def post_run(self, expt_pts, expt_avg_data):
         pass
 
+
+class HalfPiYPhaseOptimizationExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='HalfPiYPhaseOptimization', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=HalfPiYPhaseOptimizationSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass
+
+
+class HalfPiYOptimizationExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='HalfPiYOptimization', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=HalfPiYOptimizationSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass
+
+
+
+
+class HalfPiXOptimizationSweepExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='HalfPiXOptimization_Sweep', config_file='..\\config.json', **kwargs):
+        self.extra_args={}
+        for key, value in kwargs.iteritems():
+            self.extra_args[key] = value
+        self.pulse_length = self.extra_args['pulse_length']
+
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=HalfPiXOptimizationSweepSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        slab_file = SlabFile(self.data_file)
+        with slab_file as f:
+            f.append_pt('pulse_sweep', self.pulse_length)
+            f.append_line('sweep_expt_avg_data', expt_avg_data)
+            f.append_line('sweep_expt_pts', expt_pts)
+            f.close()
+
+
+class HalfPiYOptimizationSweepExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='HalfPiYOptimization_Sweep', config_file='..\\config.json', **kwargs):
+        self.extra_args={}
+        for key, value in kwargs.iteritems():
+            self.extra_args[key] = value
+        self.pulse_length = self.extra_args['pulse_length']
+
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=HalfPiYOptimizationSweepSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        slab_file = SlabFile(self.data_file)
+        with slab_file as f:
+            f.append_pt('pulse_sweep', self.pulse_length)
+            f.append_line('sweep_expt_avg_data', expt_avg_data)
+            f.append_line('sweep_expt_pts', expt_pts)
+            f.close()
+
+class PiXOptimizationSweepExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='PiXPulseOptimization_Sweep', config_file='..\\config.json', **kwargs):
+        self.extra_args={}
+        for key, value in kwargs.iteritems():
+            self.extra_args[key] = value
+        self.pulse_length = self.extra_args['pulse_length']
+
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=PiXOptimizationSweepSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, **kwargs)
+
+    def pre_run(self):
+        pass
+
+    def post_run(self, expt_pts, expt_avg_data):
+        slab_file = SlabFile(self.data_file)
+        with slab_file as f:
+            f.append_pt('pulse_sweep', self.pulse_length)
+            f.append_line('sweep_expt_avg_data', expt_avg_data)
+            f.append_line('sweep_expt_pts', expt_pts)
+            f.close()
 
 class RabiSweepExperiment(QubitPulseSequenceExperiment):
     def __init__(self, path='', prefix='Rabi_Sweep', config_file='..\\config.json', **kwargs):
@@ -247,48 +342,3 @@ class RabiSweepExperiment(QubitPulseSequenceExperiment):
             f.append_line('sweep_expt_pts', expt_pts)
 
             f.close()
-
-class HalfPiXPulseOptimizationSweepExperiment(QubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='HalfPiXPulseOptimization_Sweep', config_file='..\\config.json', **kwargs):
-        self.extra_args={}
-        for key, value in kwargs.iteritems():
-            self.extra_args[key] = value
-        self.pulse_length = self.extra_args['pulse_length']
-
-        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=HalfPiXPulseOptimizationSweepSequence, pre_run=self.pre_run,
-                                                    post_run=self.post_run, **kwargs)
-
-    def pre_run(self):
-        pass
-
-    def post_run(self, expt_pts, expt_avg_data):
-        slab_file = SlabFile(self.data_file)
-        with slab_file as f:
-            f.append_pt('pulse_sweep', self.pulse_length)
-            f.append_line('sweep_expt_avg_data', expt_avg_data)
-            f.append_line('sweep_expt_pts', expt_pts)
-            f.close()
-
-class PiXPulseOptimizationSweepExperiment(QubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='PiXPulseOptimization_Sweep', config_file='..\\config.json', **kwargs):
-        self.extra_args={}
-        for key, value in kwargs.iteritems():
-            self.extra_args[key] = value
-        self.pulse_length = self.extra_args['pulse_length']
-
-        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=PiXPulseOptimizationSweepSequence, pre_run=self.pre_run,
-                                                    post_run=self.post_run, **kwargs)
-
-    def pre_run(self):
-        pass
-
-    def post_run(self, expt_pts, expt_avg_data):
-        slab_file = SlabFile(self.data_file)
-        with slab_file as f:
-            f.append_pt('pulse_sweep', self.pulse_length)
-            f.append_line('sweep_expt_avg_data', expt_avg_data)
-            f.append_line('sweep_expt_pts', expt_pts)
-            f.close()
-

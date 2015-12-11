@@ -3,18 +3,18 @@ __author__ = 'dave'
 import numpy as np
 
 
-def sideband(t, i, q, freq=0, phase=0, offset=False, offset_fit_lin=0,offset_fit_quad=0):
+def sideband(t, plus, minus, freq=0, phase=0, offset=False, offset_fit_lin=0,offset_fit_quad=0):
     if offset:
-        if (not max(i) == 0):
+        if (not max(plus) == 0):
             time_step = t[1]-t[0]
             freq_calibrated = getFreq(i,freq,offset_fit_lin,offset_fit_quad);
             freq_integ_array = np.cumsum(freq_calibrated)*time_step
             # np.savetxt('time.out', t, delimiter=',')
-        return ( np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * i - np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * q,
-             -np.sin(2 * np.pi * (freq_integ_array/1.0e9)+ phase*np.pi/180.0) * i - np.sin(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * q)
+        return ( np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * plus - np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * minus,
+             -np.sin(2 * np.pi * (freq_integ_array/1.0e9)+ phase*np.pi/180.0) * plus - np.sin(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * minus)
     else:
-        return ( np.cos(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * i - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * q,
-             -np.sin(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * i - np.sin(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * q)
+        return ( np.cos(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus,
+             -np.sin(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus - np.sin(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus)
 
 
 

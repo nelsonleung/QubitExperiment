@@ -49,6 +49,16 @@ class PulseSequenceBuilder():
                 amp = self.pulse_cfg[type]['a']
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
+            if name == "pi_y":
+                amp = self.pulse_cfg[type]['a']
+                length = self.pulse_cfg[type]['pi_length']
+                freq = self.pulse_cfg[type]['iq_freq']
+                phase = self.pulse_cfg[type]['y_phase']
+            if name == "half_pi_y":
+                amp = self.pulse_cfg[type]['a']
+                length = self.pulse_cfg[type]['half_pi_length']
+                freq = self.pulse_cfg[type]['iq_freq']
+                phase = self.pulse_cfg[type]['y_phase']
             pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
             if self.flux_pulse_started:
                 self.pulse_span_length_list_temp.append(pulse_span_length)
