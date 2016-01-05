@@ -19,7 +19,10 @@ class RabiSequence(QubitPulseSequence):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.expt_cfg['iq_freq'])
+        if self.expt_cfg['sweep_amp']:
+            self.psb.append('q','general', self.pulse_type, amp=pt, length=self.expt_cfg['length'],freq=self.expt_cfg['iq_freq'])
+        else:
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.expt_cfg['iq_freq'])
 
 
 
@@ -141,6 +144,7 @@ class T1Sequence(QubitPulseSequence):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
+        # self.psb.append('q','general', 'square', amp=1, length=16,freq=150e6)
         self.psb.append('q','pi', self.pulse_type)
         self.psb.idle(pt)
 
@@ -273,8 +277,7 @@ class TomographySequence(QubitPulseSequence):
 
     def define_pulses(self,pt):
         ### Initiate states
-        self.psb.append('q','half_pi_y', self.pulse_type)
-
+        self.psb.append('q','half_pi', self.pulse_type)
 
         ### gates before measurement for tomography
         if pt == 0:
@@ -369,6 +372,7 @@ class PiYOptimizationSweepSequence(QubitPulseSequence):
 
 
 class RabiSweepSequence(QubitPulseSequence):
+
     def __init__(self,name, cfg, expt_cfg, **kwargs):
         self.pulse_cfg = cfg['pulse_info']
 

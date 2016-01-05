@@ -85,7 +85,7 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
         print "T2*: " + str(fitdata[3]) + " ns"
 
         print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
-        print "Or Suggested Flux: " +str(self.flux -self.offset_freq/ self.freq_flux_slope)
+        # print "Or Suggested Flux: " +str(self.flux -self.offset_freq/ self.freq_flux_slope)
 
 
 class SpinEchoExperiment(QubitPulseSequenceExperiment):

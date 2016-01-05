@@ -179,6 +179,7 @@ class PulseSequenceBuilder():
         Pulses are appended backward, from the last pulse to the first pulse.
         '''
         self.origin = self.max_length - (self.measurement_delay + self.measurement_width + self.start_end_buffer)
+        self.uses_tek2 = False
         for ii in range(len(pulse_sequence_matrix)):
             self.markers_readout[ii] = ap.square(self.mtpts, 1, self.origin + self.measurement_delay,
                                                  self.measurement_width)
@@ -217,6 +218,7 @@ class PulseSequenceBuilder():
                         self.markers_qubit_buffer[ii] += qubit_marker
 
                 elif pulse.target[:4] == "q,mm":
+                    self.uses_tek2 = True
                     if flux_pulse_started == False:
                         flux_end_location = pulse_location
                         flux_pulse_started = True
@@ -232,6 +234,7 @@ class PulseSequenceBuilder():
                     if pulse_defined:
                         self.waveforms_qubit_flux[ii] += waveforms_qubit_flux
                 elif pulse.target[:4] == "q:mm":
+                    self.uses_tek2 = True
                     if flux_pulse_started == False:
                         flux_end_location = pulse_location
                         flux_pulse_started = True
@@ -254,8 +257,7 @@ class PulseSequenceBuilder():
                 if flux_pulse_started:
                     flux_pulse_location -= pulse.span_length
 
-
-            if not flux_end_location ==0:
+            if self.uses_tek2:
                 self.markers_ch3m1[ii] = ap.square(self.mtpts, 1,
                                                 self.origin - flux_end_location - total_pulse_span_length_list[
                                                     ii] - self.tek2_trigger_delay,

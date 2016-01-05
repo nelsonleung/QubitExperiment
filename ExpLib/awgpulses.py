@@ -7,14 +7,19 @@ def sideband(t, plus, minus, freq=0, phase=0, offset=False, offset_fit_lin=0,off
     if offset:
         if (not max(plus) == 0):
             time_step = t[1]-t[0]
-            freq_calibrated = getFreq(i,freq,offset_fit_lin,offset_fit_quad);
+            freq_calibrated = getFreq(plus,freq,offset_fit_lin,offset_fit_quad);
             freq_integ_array = np.cumsum(freq_calibrated)*time_step
             # np.savetxt('time.out', t, delimiter=',')
         return ( np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * plus - np.cos(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * minus,
              -np.sin(2 * np.pi * (freq_integ_array/1.0e9)+ phase*np.pi/180.0) * plus - np.sin(2 * np.pi * (freq_integ_array/1.0e9) + phase*np.pi/180.0) * minus)
     else:
+        # For ML0218 Mixer
         return ( np.cos(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus,
-             -np.sin(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus - np.sin(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus)
+             +np.sin(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus +np.sin(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus)
+        #
+        # For IQ0317 Mixer
+        # return ( np.cos(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus - np.cos(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus,
+        #      -np.sin(2 * np.pi * (freq/1.0e9 * t)+ phase*np.pi/180.0) * plus - np.sin(2 * np.pi * (freq/1.0e9 * t) + phase*np.pi/180.0) * minus)
 
 
 
