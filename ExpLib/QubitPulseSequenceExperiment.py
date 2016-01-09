@@ -5,6 +5,7 @@ from slab.instruments.Alazar import Alazar
 from slab.experiments.General.PulseSequences.SingleQubitPulseSequences import *
 from slab.experiments.Multimode.PulseSequences.MultimodePulseSequence import *
 from numpy import mean, arange
+from slab.instruments.awg.PXDAC4800 import PXDAC4800
 
 
 class QubitPulseSequenceExperiment(Experiment):
@@ -79,15 +80,23 @@ class QubitPulseSequenceExperiment(Experiment):
         print "Prep Instruments"
         self.readout.set_frequency(self.cfg['readout']['frequency'])
         self.readout.set_power(self.cfg['readout']['power'])
+        print self.cfg['readout']['power']
+        print "Readout power: " + str(self.readout.get_power())
         self.readout.set_ext_pulse(mod=True)
-        self.readout_shifter.set_phase(self.cfg['readout']['start_phase'] + self.cfg['readout']['phase_slope'] * (
-            self.cfg['readout']['frequency'] - self.cfg['readout']['bare_frequency']), self.cfg['readout']['frequency'])
+        try:
+            self.readout_shifter.set_phase(self.cfg['readout']['start_phase'] + self.cfg['readout']['phase_slope'] * (
+                self.cfg['readout']['frequency'] - self.cfg['readout']['bare_frequency']), self.cfg['readout']['frequency'])
+        except:
+            print "Warning: phase shifter not found."
 
         self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg['pulse_info'][self.pulse_type]['iq_freq'])
         self.drive.set_power(self.cfg['drive']['power'])
-        self.drive.set_ext_pulse(mod=True)
+        self.drive.set_ext_pulse(mod=self.cfg['drive']['mod'])
         self.drive.set_output(True)
-        self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
+        try:
+            self.readout_atten.set_attenuator(self.cfg['readout']['dig_atten'])
+        except:
+            print "Warning: digital attenuator not found."
 
         try:
             self.cfg['freq_flux']['flux']=self.extra_args['flux']
@@ -105,12 +114,19 @@ class QubitPulseSequenceExperiment(Experiment):
             pass
 
 
-        if self.cfg['freq_flux']['current']:
-            self.flux_volt.ramp_current(self.cfg['freq_flux']['flux'])
-        elif self.cfg['freq_flux']['voltage']:
-            self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux'])
+        try:
+            if self.cfg['freq_flux']['current']:
+                self.flux_volt.ramp_current(self.cfg['freq_flux']['flux'])
+            elif self.cfg['freq_flux']['voltage']:
+                self.flux_volt.ramp_volt(self.cfg['freq_flux']['flux'])
+        except:
+            print "Warning: flux dc source not found."
 
-        self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
+        print self.awg
+        try:
+            self.awg.set_amps_offsets(self.cfg['cal']['iq_amps'], self.cfg['cal']['iq_offsets'])
+        except:
+            print "Fail setting awg."
 
         if self.pre_run is not None:
             self.pre_run()
@@ -125,7 +141,7 @@ class QubitPulseSequenceExperiment(Experiment):
         current_data = None
         for ii in arange(max(1, self.cfg[self.expt_cfg_name]['averages'] / 100)):
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data_by_record(prep_function=self.awg_prep,
-                                                                    start_function=self.awg.run,
+                                                                    start_function=self.awg_run,
                                                                     excise=self.cfg['readout']['window'])
 
             mag = sqrt(ch1_pts**2+ch2_pts**2)
@@ -178,12 +194,19 @@ class QubitPulseSequenceExperiment(Experiment):
                 f.add('expt_pts', self.expt_pts)
                 f.close()
 
+        PXDAC4800().stop()
+
         if self.post_run is not None:
             self.post_run(self.expt_pts, expt_avg_data)
 
     def awg_prep(self):
-        self.awg.stop_and_prep()
-        if self.prep_tek2:
-            self.tek2.stop()
-            self.tek2.prep_experiment()
-            self.tek2.run()
+        PXDAC4800().stop()
+        # self.awg.stop_and_prep()
+        # if self.prep_tek2:
+        #     self.tek2.stop()
+        #     self.tek2.prep_experiment()
+        #     self.tek2.run()
+
+    def awg_run(self):
+        PXDAC4800().run_experiment()
+        # self.awg.run
