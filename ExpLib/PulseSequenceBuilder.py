@@ -26,6 +26,7 @@ class PulseSequenceBuilder():
         self.cfg = cfg
         self.start_end_buffer = buffer_cfg['tek1_start_end']
         self.marker_start_buffer = buffer_cfg['marker_start']
+        self.marker_end_buffer = buffer_cfg['marker_end']
         self.tek2_trigger_delay = buffer_cfg['tek2_trigger_delay']
         self.pulse_cfg = cfg['pulse_info']
         self.readout_cfg = cfg['readout']
@@ -42,20 +43,20 @@ class PulseSequenceBuilder():
         '''
         if target == "q":
             if name == "pi":
-                amp = self.pulse_cfg[type]['a']
+                amp = self.pulse_cfg[type]['pi_a']
                 length = self.pulse_cfg[type]['pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
             if name == "half_pi":
-                amp = self.pulse_cfg[type]['a']
+                amp = self.pulse_cfg[type]['half_pi_a']
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
             if name == "pi_y":
-                amp = self.pulse_cfg[type]['a']
+                amp = self.pulse_cfg[type]['pi_a']
                 length = self.pulse_cfg[type]['pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
                 phase = self.pulse_cfg[type]['y_phase']
             if name == "half_pi_y":
-                amp = self.pulse_cfg[type]['a']
+                amp = self.pulse_cfg[type]['half_pi_a']
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
                 phase = self.pulse_cfg[type]['y_phase']
@@ -205,11 +206,11 @@ class PulseSequenceBuilder():
                 if pulse.target == "q":
                     if pulse.type == "square":
                         qubit_waveforms, qubit_marker = square(self.wtpts, self.mtpts, self.origin,
-                                                               self.marker_start_buffer, pulse_location, pulse,
+                                                               self.marker_start_buffer, self.marker_end_buffer,pulse_location, pulse,
                                                                self.pulse_cfg)
                     elif pulse.type == "gauss":
                         qubit_waveforms, qubit_marker = gauss(self.wtpts, self.mtpts, self.origin,
-                                                              self.marker_start_buffer, pulse_location, pulse)
+                                                              self.marker_start_buffer, self.marker_end_buffer,pulse_location, pulse)
                     else:
                         raise ValueError('Wrong pulse type has been defined')
                     if pulse_defined:

@@ -176,6 +176,7 @@ class HalfPiXOptimizationSweepSequence(QubitPulseSequence):
             self.extra_args[key] = value
             #print str(key) + ": " + str(value)
         self.pulse_length = self.extra_args['pulse_length']
+        self.pulse_amp = self.extra_args['pulse_amp']
 
         QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
@@ -189,7 +190,7 @@ class HalfPiXOptimizationSweepSequence(QubitPulseSequence):
         n = 2*pt+1
         i = 0
         while i< n:
-            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.pulse_amp, length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'], phase= self.expt_cfg['phase'])
             i += 1
 
 
@@ -224,45 +225,7 @@ class HalfPiYPhaseOptimizationSequence(QubitPulseSequence):
 
     def define_pulses(self,pt):
         self.psb.append('q','half_pi', self.pulse_type)
-        self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_cfg[self.pulse_type]['half_pi_length'],freq=self.pulse_cfg[self.pulse_type]['iq_freq'],phase=pt)
-
-class HalfPiYOptimizationSequence(QubitPulseSequence):
-    def __init__(self,name, cfg, expt_cfg,**kwargs):
-        self.pulse_cfg = cfg['pulse_info']
-        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
-
-    def define_points(self):
-        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-
-    def define_parameters(self):
-        self.pulse_type =  self.expt_cfg['pulse_type']
-
-    def define_pulses(self,pt):
-        n = 2*pt+1
-        i = 0
-        while i< n:
-            self.psb.append('q','half_pi_y', self.pulse_type)
-            i += 1
-
-class PiYOptimizationSequence(QubitPulseSequence):
-    def __init__(self,name, cfg, expt_cfg,**kwargs):
-        self.pulse_cfg = cfg['pulse_info']
-        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
-
-    def define_points(self):
-        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-
-    def define_parameters(self):
-        self.pulse_type =  self.expt_cfg['pulse_type']
-
-    def define_pulses(self,pt):
-        n = pt
-        i = 0
-        self.psb.append('q','half_pi_y', self.pulse_type)
-        while i< n:
-            self.psb.append('q','pi_y', self.pulse_type)
-            i += 1
-
+        self.psb.append('q','half_pi', self.pulse_type,phase=pt)
 
 class TomographySequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
@@ -277,7 +240,9 @@ class TomographySequence(QubitPulseSequence):
 
     def define_pulses(self,pt):
         ### Initiate states
-        self.psb.append('q','half_pi', self.pulse_type)
+        self.psb.append('q','pi', self.pulse_type)
+        self.psb.idle(600)
+        # self.psb.append('q','general', "square", amp=1.0, length=1200,freq=125e6)
 
         ### gates before measurement for tomography
         if pt == 0:
@@ -290,33 +255,6 @@ class TomographySequence(QubitPulseSequence):
             # <Z>
             pass
 
-
-class HalfPiYOptimizationSweepSequence(QubitPulseSequence):
-    def __init__(self,name, cfg, expt_cfg,**kwargs):
-        self.pulse_cfg = cfg['pulse_info']
-        self.expt_cfg = expt_cfg
-        self.extra_args={}
-        for key, value in kwargs.iteritems():
-            self.extra_args[key] = value
-            #print str(key) + ": " + str(value)
-        self.pulse_length = self.extra_args['pulse_length']
-
-        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
-
-    def define_points(self):
-        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-
-    def define_parameters(self):
-        self.pulse_type =  self.expt_cfg['pulse_type']
-
-    def define_pulses(self,pt):
-        n = 2*pt+1
-        i = 0
-        while i< n:
-            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'],phase=self.pulse_cfg[self.pulse_type]['y_phase'])
-            i += 1
-
-
 class PiXOptimizationSweepSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
         self.pulse_cfg = cfg['pulse_info']
@@ -326,6 +264,7 @@ class PiXOptimizationSweepSequence(QubitPulseSequence):
             self.extra_args[key] = value
             #print str(key) + ": " + str(value)
         self.pulse_length = self.extra_args['pulse_length']
+        self.pulse_amp = self.extra_args['pulse_amp']
 
         QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
 
@@ -340,34 +279,7 @@ class PiXOptimizationSweepSequence(QubitPulseSequence):
         i = 0
         self.psb.append('q','half_pi', self.pulse_type)
         while i< n:
-            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'])
-            i += 1
-
-
-class PiYOptimizationSweepSequence(QubitPulseSequence):
-    def __init__(self,name, cfg, expt_cfg,**kwargs):
-        self.pulse_cfg = cfg['pulse_info']
-        self.expt_cfg = expt_cfg
-        self.extra_args={}
-        for key, value in kwargs.iteritems():
-            self.extra_args[key] = value
-            #print str(key) + ": " + str(value)
-        self.pulse_length = self.extra_args['pulse_length']
-
-        QubitPulseSequence.__init__(self,name, cfg, expt_cfg,self.define_points, self.define_parameters, self.define_pulses)
-
-    def define_points(self):
-        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
-
-    def define_parameters(self):
-        self.pulse_type =  self.expt_cfg['pulse_type']
-
-    def define_pulses(self,pt):
-        n = pt
-        i = 0
-        self.psb.append('q','half_pi_y', self.pulse_type)
-        while i< n:
-            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg[self.pulse_type]['a'], length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'],phase=self.pulse_cfg[self.pulse_type]['y_phase'])
+            self.psb.append('q','general', self.pulse_type, amp=self.pulse_amp, length=self.pulse_length,freq=self.pulse_cfg[self.pulse_type]['iq_freq'])
             i += 1
 
 

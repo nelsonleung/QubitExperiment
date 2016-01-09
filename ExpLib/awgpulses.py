@@ -43,7 +43,7 @@ def getFreq(pulse,freq,offset_fit_lin=0,offset_fit_quad=0):
 
 def gauss(t, a, t0, sigma):
     if sigma >0:
-        return a * np.exp(-1.0 * (t - t0) ** 2 / (2 * sigma ** 2))
+        return (t >= t0-2*sigma) * (t <= t0+2*sigma)*a * np.exp(-1.0 * (t - t0) ** 2 / (2 * sigma ** 2))
     else:
         return 0*(t-t0)
 
@@ -60,8 +60,8 @@ def square(t, a, t0, w, sigma=0):
     if sigma>0:
         return a * (
             (t >= t0) * (t < t0 + w) +  # Normal square pulse
-            (t < t0) * np.exp(-(t - t0) ** 2 / (2 * sigma ** 2)) +  # leading gaussian edge
-            (t >= t0 + w) * np.exp(-(t - (t0 + w)) ** 2 / (2 * sigma ** 2))  # trailing edge
+            (t >= t0-2*sigma) * (t < t0) * np.exp(-(t - t0) ** 2 / (2 * sigma ** 2)) +  # leading gaussian edge
+            (t >= t0 + w)* (t <= t0+w+2*sigma) * np.exp(-(t - (t0 + w)) ** 2 / (2 * sigma ** 2))  # trailing edge
         )
     else:
         return a * (t >= t0) * (t < t0 + w)
@@ -77,6 +77,6 @@ def trapezoid(t, a, t0, w, edge_time=0):
 
 def get_pulse_span_length(cfg, type, length):
     if type == "gauss":
-        return length * 6
+        return length * 4 ## 4 sigma
     if type == "square":
-        return length + 6 * cfg[type]['ramp_sigma']
+        return length + 4 * cfg[type]['ramp_sigma']
