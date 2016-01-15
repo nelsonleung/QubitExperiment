@@ -77,6 +77,6 @@ def trapezoid(t, a, t0, w, edge_time=0):
 
 def get_pulse_span_length(cfg, type, length):
     if type == "gauss":
-        return length * 4 ## 4 sigma
+        return length * 4 +cfg['spacing'] ## 4 sigma
     if type == "square":
-        return length + 4 * cfg[type]['ramp_sigma']
+        return length + 4 * cfg[type]['ramp_sigma'] +cfg['spacing']

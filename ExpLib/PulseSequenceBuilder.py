@@ -37,7 +37,7 @@ class PulseSequenceBuilder():
         self.pulse_span_length_list_temp = []
 
 
-    def append(self, target, name, type, amp=0, length=0, freq=0, phase=0, **kwargs):
+    def append(self, target, name, type, amp=0, length=0, freq=0, phase=None, **kwargs):
         '''
         Append a pulse in the pulse sequence.
         '''
@@ -46,20 +46,26 @@ class PulseSequenceBuilder():
                 amp = self.pulse_cfg[type]['pi_a']
                 length = self.pulse_cfg[type]['pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
+                if phase == None:
+                    phase = self.pulse_cfg[type]['phase']
             if name == "half_pi":
                 amp = self.pulse_cfg[type]['half_pi_a']
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
+                if phase == None:
+                    phase = self.pulse_cfg[type]['phase']
             if name == "pi_y":
                 amp = self.pulse_cfg[type]['pi_a']
                 length = self.pulse_cfg[type]['pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
-                phase = self.pulse_cfg[type]['y_phase']
+                if phase == None:
+                    phase = self.pulse_cfg[type]['y_phase']
             if name == "half_pi_y":
                 amp = self.pulse_cfg[type]['half_pi_a']
                 length = self.pulse_cfg[type]['half_pi_length']
                 freq = self.pulse_cfg[type]['iq_freq']
-                phase = self.pulse_cfg[type]['y_phase']
+                if phase == None:
+                    phase = self.pulse_cfg[type]['y_phase']
             pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
             if self.flux_pulse_started:
                 self.pulse_span_length_list_temp.append(pulse_span_length)
@@ -85,6 +91,9 @@ class PulseSequenceBuilder():
 
         else:
             raise ValueError('Wrong target has been defined')
+
+        if phase == None:
+            phase = 0
 
         pulse = Pulse(target, name, type, amp, length, freq, phase, pulse_span_length)
 
