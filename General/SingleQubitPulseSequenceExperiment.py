@@ -16,31 +16,29 @@ class RabiExperiment(QubitPulseSequenceExperiment):
         self.drive.set_frequency(self.cfg['qubit']['frequency'] - self.cfg[self.expt_cfg_name]['iq_freq'])
 
     def post_run(self, expt_pts, expt_avg_data):
+
+
+
         if self.cfg[self.expt_cfg_name]['calibrate_pulse']:
             print "Analyzing Rabi Data"
             fitdata = fitdecaysin(expt_pts, expt_avg_data)
-
             pulse_type = self.cfg[self.expt_cfg_name]['pulse_type']
             # determine the start location of the rabi oscillation. +1 if it starts top; -1 if it starts bottom.
             start_signal = np.sign(180 - fitdata[2] % 360)
-            if pulse_type is 'gauss':
-                self.cfg['cal']['excited_signal'] = start_signal
+
+            self.excited_signal = start_signal
             # time takes to have the rabi oscillation phase to +/- pi/2
-            pi_length = (self.cfg['cal']['excited_signal'] * np.sign(fitdata[0]) * 0.5 * np.pi - fitdata[
+            pi_length = (self.excited_signal * np.sign(fitdata[0]) * 0.5 * np.pi - fitdata[
                 2] * np.pi / 180.) / (2 * np.pi * fitdata[1]) % (1 / fitdata[1])
             # time takes to have the rabi oscillation phase to 0/ pi
-            half_pi_length = (self.cfg['cal']['excited_signal'] * np.sign(fitdata[0]) * np.pi - fitdata[
+            half_pi_length = (self.excited_signal * np.sign(fitdata[0]) * np.pi - fitdata[
                 2] * np.pi / 180.) / (2 * np.pi * fitdata[1]) % (0.5 / fitdata[1])
 
-            from time import gmtime, strftime
 
-            self.cfg['pulse_info'][pulse_type]['calibrated_time'] = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-
-            self.cfg['pulse_info'][pulse_type]['pi_length'] = pi_length
-            self.cfg['pulse_info'][pulse_type]['half_pi_length'] = half_pi_length
-            self.cfg['pulse_info'][pulse_type]['a'] = self.cfg[self.expt_cfg_name]['a']
-            self.cfg['pulse_info'][pulse_type]['iq_freq'] = self.cfg[self.expt_cfg_name]['iq_freq']
-            # self.save_config()
+            self.pi_length = pi_length
+            self.half_pi_length = half_pi_length
+            self.a = self.cfg[self.expt_cfg_name]['a']
+            self.iq_freq = self.cfg[self.expt_cfg_name]['iq_freq']
 
 
 class T1Experiment(QubitPulseSequenceExperiment):
@@ -80,11 +78,11 @@ class RamseyExperiment(QubitPulseSequenceExperiment):
         self.flux = self.cfg['freq_flux']['flux']
         self.freq_flux_slope = self.cfg['freq_flux']['freq_flux_slope']
 
-        suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
+        self.suggested_qubit_freq = self.cfg['qubit']['frequency'] - (fitdata[1] * 1e9 - self.cfg['ramsey']['ramsey_freq'])
         print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
         print "T2*: " + str(fitdata[3]) + " ns"
 
-        print "Suggested Qubit Frequency: " + str(suggested_qubit_freq)
+        print "Suggested Qubit Frequency: " + str(self.suggested_qubit_freq)
         print "Or Suggested Flux: " +str(self.flux -self.offset_freq/ self.freq_flux_slope)
 
 
@@ -325,28 +323,117 @@ class RabiSweepExperiment(QubitPulseSequenceExperiment):
 
             f.close()
 
-class RabiRamseyRabiT1FluxSweepExperiment(QubitPulseSequenceExperiment):
-    def __init__(self, path='', prefix='Rabi_Sweep', config_file='..\\config.json', **kwargs):
+class RabiRamseyT1FluxSweepExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='rabi_ramsey_t1_flux_sweep', config_file='..\\config.json', **kwargs):
         self.extra_args={}
         for key, value in kwargs.iteritems():
             self.extra_args[key] = value
         self.drive_freq = self.extra_args['drive_freq']
+        self.exp = self.extra_args['exp']
+        self.flux = self.extra_args['flux']
+
         QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
-                                                    PulseSequence=RabiRamseyRabiT1FluxSweepSequence, pre_run=self.pre_run,
+                                                    PulseSequence=RabiRamseyT1FluxSweepSequence, pre_run=self.pre_run,
                                                     post_run=self.post_run,**kwargs)
 
 
 
     def pre_run(self):
-        self.drive.set_frequency(self.drive_freq)
+        self.drive.set_frequency(self.drive_freq - self.cfg[self.expt_cfg_name]['iq_freq'])
 
 
     def post_run(self, expt_pts, expt_avg_data):
         #print self.data_file
+
+        if self.exp == 'rabi' or self.exp == 'ef_rabi':
+            print "Analyzing Rabi Data"
+            fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+            # determine the start location of the rabi oscillation. +1 if it starts top; -1 if it starts bottom.
+
+            ### get's excited signal by looking at 1st signal
+            start_signal = np.sign(mean(expt_avg_data) - expt_avg_data[0])
+            self.excited_signal = start_signal
+
+            # ### get's excited signal by looking at phase
+            # start_signal = np.sign(180 - fitdata[2] % 360)
+            # self.excited_signal = start_signal
+
+            # time takes to have the rabi oscillation phase to +/- pi/2
+            # pi_length = (self.excited_signal * np.sign(fitdata[0]) * 0.5 * np.pi - fitdata[
+            #     2] * np.pi / 180.) / (2 * np.pi * fitdata[1]) % (1 / fitdata[1])
+            # time takes to have the rabi oscillation phase to 0/ pi
+            # half_pi_length = (self.excited_signal * np.sign(fitdata[0]) * np.pi - fitdata[
+            #     2] * np.pi / 180.) / (2 * np.pi * fitdata[1]) % (0.5 / fitdata[1])
+            pi_length = 0.5/fitdata[1]
+            half_pi_length = pi_length/2
+
+
+            self.pi_length = pi_length
+            self.half_pi_length = half_pi_length
+
+            print "Pi length: " + str(self.pi_length)
+            print "Half pi: " + str(self.half_pi_length)
+
+        if self.exp == 'ramsey' or self.exp == 'ramsey_long':
+            print "Analyzing Ramsey Data"
+            fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+            self.offset_freq =self.cfg['ramsey']['ramsey_freq'] - fitdata[1] * 1e9
+
+            self.flux = self.cfg['freq_flux']['flux']
+            self.freq_flux_slope = self.cfg['freq_flux']['freq_flux_slope']
+
+            self.suggested_qubit_freq = self.drive_freq - (fitdata[1] * 1e9 - self.cfg[self.expt_cfg_name]['ramsey']['ramsey_freq'])
+            print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+            print "T2*: " + str(fitdata[3]) + " ns"
+            self.t2 = fitdata[3]
+
+            print "Suggested Qubit Frequency: " + str(self.suggested_qubit_freq)
+            print "Or Suggested Flux: " +str(self.flux -self.offset_freq/ self.freq_flux_slope)
+
+        if self.exp == 't1' or self.exp =='ef_t1':
+            print "Analyzing T1 Data"
+            fitdata = fitexp(expt_pts, expt_avg_data)
+            print "T1: " + str(fitdata[3]) + " ns"
+            self.t1 = fitdata[3]
+
+
+        if self.exp == 'ef_ramsey' or self.exp == 'ef_ramsey_long':
+            self.alpha = self.extra_args['alpha']
+            print "Analyzing EF Ramsey Data"
+            fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+            self.suggested_qubit_alpha = self.alpha - (fitdata[1] * 1e9 - self.cfg[self.expt_cfg_name]['ef_ramsey']['ramsey_freq'])
+            print "Oscillation frequency: " + str(fitdata[1] * 1e3) + " MHz"
+            print "T2*: " + str(fitdata[3]) + " ns"
+            self.t2 = fitdata[3]
+
+
+        if self.exp == 'half_pi_phase_sweep':
+            print "Analyzing Half Pi Phase Sweep Data"
+            fitdata = fitdecaysin(expt_pts, expt_avg_data)
+
+            self.half_pi_phase = fitdata[2]%360
+            print "Oscillation phase: " + str(self.half_pi_phase)
+
+
         slab_file = SlabFile(self.data_file)
         with slab_file as f:
+            f.append_pt('flux',self.flux)
             f.append_pt('drive_freq', self.drive_freq)
-            f.append_line('sweep_expt_avg_data', expt_avg_data)
-            f.append_line('sweep_expt_pts', expt_pts)
+            f.append_line(self.exp+'_expt_avg_data', expt_avg_data)
+            f.append_line(self.exp+'_expt_pts', expt_pts)
+            if self.exp == 'ramsey_long':
+                f.append_pt("t2",self.t2)
+            if self.exp == 't1':
+                f.append_pt("t1",self.t1)
+            if self.exp == 'ef_ramsey_long':
+                f.append_pt("ef_t2",self.t2)
+                f.append_pt("alpha",self.suggested_qubit_alpha)
+            # if self.exp == 'ef_t1':
+            #     f.append_pt("ef_t1",self.t1)
+            if self.exp == 'half_pi_phase_sweep':
+                f.append_pt("half_pi_phase",self.half_pi_phase)
 
             f.close()

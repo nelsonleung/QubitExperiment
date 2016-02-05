@@ -156,3 +156,37 @@ class MultimodePi_PiExperiment(QubitPulseSequenceExperiment):
 
     def post_run(self, expt_pts, expt_avg_data):
         pass
+
+class CPhaseOptimizationSweepExperiment(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='multimode_cphase_optimization_sweep', config_file='..\\config.json', **kwargs):
+        self.extra_args={}
+        for key, value in kwargs.iteritems():
+            self.extra_args[key] = value
+        self.idle_time = self.extra_args['idle_time']
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=CPhaseOptimizationSweepSequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, prep_tek2= True,**kwargs)
+
+    def pre_run(self):
+        self.tek2 = InstrumentManager()["TEK2"]
+
+    def post_run(self, expt_pts, expt_avg_data):
+        slab_file = SlabFile(self.data_file)
+        with slab_file as f:
+            f.append_pt('idle_time', self.idle_time)
+            f.append_line('sweep_expt_avg_data', expt_avg_data)
+            f.append_line('sweep_expt_pts', expt_pts)
+
+            f.close()
+
+class MultimodeSingleResonatorTomography(QubitPulseSequenceExperiment):
+    def __init__(self, path='', prefix='multimode_Single_Resonator_Tomography', config_file='..\\config.json', **kwargs):
+        QubitPulseSequenceExperiment.__init__(self, path=path, prefix=prefix, config_file=config_file,
+                                                    PulseSequence=MultimodeSingleResonatorTomographySequence, pre_run=self.pre_run,
+                                                    post_run=self.post_run, prep_tek2= True,**kwargs)
+
+    def pre_run(self):
+        self.tek2 = InstrumentManager()["TEK2"]
+
+    def post_run(self, expt_pts, expt_avg_data):
+        pass

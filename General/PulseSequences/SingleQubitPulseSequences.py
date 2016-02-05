@@ -42,6 +42,8 @@ class RamseySequence(QubitPulseSequence):
     def define_pulses(self,pt):
         self.psb.append('q','half_pi', self.pulse_type)
         self.psb.idle(pt)
+        # self.psb.append('q','general', "square", amp=1.0, length=pt,freq=-200e6)
+
         self.psb.append('q','half_pi', self.pulse_type, phase = 360.0*self.expt_cfg['ramsey_freq']*pt/(1.0e9))
 
         # # Does not work because of introducing phase in definition of half_pi
@@ -313,7 +315,7 @@ class RabiSweepSequence(QubitPulseSequence):
         self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.expt_cfg['iq_freq'])
 
 
-class RabiRamseyRabiT1FluxSweepSequence(QubitPulseSequence):
+class RabiRamseyT1FluxSweepSequence(QubitPulseSequence):
 
     def __init__(self,name, cfg, expt_cfg, **kwargs):
         self.pulse_cfg = cfg['pulse_info']
@@ -326,20 +328,42 @@ class RabiRamseyRabiT1FluxSweepSequence(QubitPulseSequence):
 
 
     def define_points(self):
-        self.expt_pts = arange(self.expt_cfg['start'], self.expt_cfg['stop'], self.expt_cfg['step'])
+        self.expt_pts = arange(self.expt_cfg[self.exp]['start'], self.expt_cfg[self.exp]['stop'], self.expt_cfg[self.exp]['step'])
 
     def define_parameters(self):
         self.pulse_type =  self.expt_cfg['pulse_type']
 
     def define_pulses(self,pt):
-        if self.exp == 'rabi':
+        if self.exp == 'rabi' or self.exp == 'rabi_long':
             self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.expt_cfg['iq_freq'])
-        elif self.exp == 'ramsey':
-            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.half_pi_length,freq=self.expt_cfg['iq_freq'])
+        elif self.exp =='ef_rabi':
+            self.ef_sideband_freq = self.expt_cfg['iq_freq']+self.extra_args['alpha']
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.ef_sideband_freq)
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
+        elif self.exp == 'ramsey' or self.exp == 'ramsey_long':
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['half_pi_length'],freq=self.expt_cfg['iq_freq'])
             self.psb.idle(pt)
-            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.half_pi_length,freq=self.expt_cfg['iq_freq'], phase = 360.0*self.expt_cfg['ramsey_freq']*pt/(1.0e9))
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['half_pi_length'],freq=self.expt_cfg['iq_freq'], phase = 360.0*self.expt_cfg[self.exp]['ramsey_freq']*pt/(1.0e9))
+        elif self.exp == 'ef_ramsey' or self.exp == 'ef_ramsey_long':
+            self.ef_sideband_freq = self.expt_cfg['iq_freq']+self.extra_args['alpha']
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['ef_half_pi_length'],freq=self.ef_sideband_freq)
+            self.psb.idle(pt)
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['ef_half_pi_length'],freq=self.ef_sideband_freq, phase = 360.0*self.expt_cfg[self.exp]['ramsey_freq']*pt/(1.0e9))
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
+        elif self.exp == 'ef_t1':
+            self.ef_sideband_freq = self.expt_cfg['iq_freq']+self.extra_args['alpha']
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['ef_pi_length'],freq=self.ef_sideband_freq)
+            self.psb.idle(pt)
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
         elif self.exp == 't1':
-            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.pi_length,freq=self.expt_cfg['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['pi_length'],freq=self.expt_cfg['iq_freq'])
             self.psb.idle(pt)
+        elif self.exp == 'half_pi_phase_sweep':
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['half_pi_length'],freq=self.expt_cfg['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=self.extra_args['half_pi_length'],freq=self.expt_cfg['iq_freq'], phase = pt)
+
 
 
