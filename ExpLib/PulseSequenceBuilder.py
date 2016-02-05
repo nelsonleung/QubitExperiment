@@ -37,7 +37,7 @@ class PulseSequenceBuilder():
         self.pulse_span_length_list_temp = []
 
 
-    def append(self, target, name, type, amp=0, length=0, freq=0, phase=None, **kwargs):
+    def append(self, target, name, type='gauss', amp=0, length=0, freq=0, phase=None, **kwargs):
         '''
         Append a pulse in the pulse sequence.
         '''
@@ -73,7 +73,26 @@ class PulseSequenceBuilder():
             self.flux_pulse_started = True
             mm_target = int(target[4:])
             mm_target_info = self.cfg['multimodes'][mm_target]
-            freq=mm_target_info['flux_pulse_freq']
+            freq = mm_target_info['flux_pulse_freq']
+            if name == "pi_ge":
+                amp = mm_target_info['a']
+                length = mm_target_info['flux_pi_length']
+                type=mm_target_info['flux_pulse_type']
+            if name == "2pi_ge":
+                amp = mm_target_info['a']
+                length = mm_target_info['flux_2pi_length']
+                type=mm_target_info['flux_pulse_type']
+            if name == "pi_ef":
+                amp = mm_target_info['a_ef']
+                length = mm_target_info['flux_pi_length_ef']
+                freq = mm_target_info['flux_pulse_freq_ef']
+                type=mm_target_info['flux_pulse_type_ef']
+            if name == "2pi_ef":
+                amp = mm_target_info['a_ef']
+                length = mm_target_info['flux_2pi_length_ef']
+                freq = mm_target_info['flux_pulse_freq_ef']
+                type=mm_target_info['flux_pulse_type_ef']
+
             pulse_span_length = ap.get_pulse_span_length(self.cfg['flux_pulse_info'], type, length)
             flux_pulse_span_length = pulse_span_length
             for span_length_temp in self.pulse_span_length_list_temp:
