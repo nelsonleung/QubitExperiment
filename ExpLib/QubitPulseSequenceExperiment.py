@@ -5,6 +5,7 @@ from slab.instruments.Alazar import Alazar
 from slab.experiments.General.PulseSequences.SingleQubitPulseSequences import *
 from slab.experiments.Multimode.PulseSequences.MultimodePulseSequence import *
 from numpy import mean, arange
+from tqdm import tqdm
 
 
 class QubitPulseSequenceExperiment(Experiment):
@@ -123,7 +124,7 @@ class QubitPulseSequenceExperiment(Experiment):
 
         expt_data = None
         current_data = None
-        for ii in arange(max(1, self.cfg[self.expt_cfg_name]['averages'] / 100)):
+        for ii in tqdm(arange(max(1, self.cfg[self.expt_cfg_name]['averages'] / 100))):
             tpts, ch1_pts, ch2_pts = adc.acquire_avg_data_by_record(prep_function=self.awg_prep,
                                                                     start_function=self.awg.run,
                                                                     excise=self.cfg['readout']['window'])
@@ -165,8 +166,7 @@ class QubitPulseSequenceExperiment(Experiment):
                 self.plotter.plot_z(self.prefix + ' Data', expt_data.T)
                 self.plotter.plot_xy(self.prefix + ' XY', self.pulse_sequence.expt_pts, expt_avg_data)
 
-
-            print ii * min(self.cfg[self.expt_cfg_name]['averages'], 100)
+            # print ii * min(self.cfg[self.expt_cfg_name]['averages'], 100)
 
             if self.data_file != None:
                 self.slab_file = SlabFile(self.data_file)

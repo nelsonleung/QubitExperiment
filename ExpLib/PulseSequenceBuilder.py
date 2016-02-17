@@ -35,7 +35,7 @@ class PulseSequenceBuilder():
         self.total_flux_pulse_span_length = 0
         self.flux_pulse_started = False
         self.pulse_span_length_list_temp = []
-
+        self.qubit_cfg = cfg['qubit']
 
     def append(self, target, name, type='gauss', amp=0, length=0, freq=0, phase=None, **kwargs):
         '''
@@ -66,6 +66,12 @@ class PulseSequenceBuilder():
                 freq = self.pulse_cfg[type]['iq_freq']
                 if phase == None:
                     phase = self.pulse_cfg[type]['y_phase']
+            if name == "pi_q_ef":
+                amp = self.pulse_cfg[type]['pi_ef_a']
+                length = self.pulse_cfg[type]['pi_ef_length']
+                freq = self.pulse_cfg[type]['iq_freq']+self.qubit_cfg['alpha']
+                if phase == None:
+                    phase = 0
             pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
             if self.flux_pulse_started:
                 self.pulse_span_length_list_temp.append(pulse_span_length)
