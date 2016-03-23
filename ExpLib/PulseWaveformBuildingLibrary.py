@@ -31,6 +31,38 @@ def flux_square(ftpts,pulse_location,pulse,pulse_cfg):
                                       pulse.freq, pulse.phase,offset=False)[0]
     return waveforms_qubit_flux
 
+def flux_square_phase_fix(ftpts,pulse_location,pulse,pulse_cfg, mm_target_info, flux_pulse_info):
+
+    if flux_pulse_info['fix_phase']:
+
+        if pulse.name[-1] == "f":
+            dc_offset = mm_target_info['dc_offset_freq_ef']
+            shifted_frequency = mm_target_info['flux_pulse_freq_ef']
+            bare_frequency = shifted_frequency-dc_offset
+            waveforms_qubit_flux = ap.sideband(ftpts,
+                                             ap.square(ftpts, pulse.amp, pulse_location-pulse.length-0.5*(pulse.span_length - pulse.length) , pulse.length, pulse_cfg['square'][
+                                                                          'ramp_sigma']), np.zeros(len(ftpts)),freq=bare_frequency, phase= 360*dc_offset/1e9*(ftpts+pulse_location)+pulse.phase,offset=False)[0]
+
+        else:
+            dc_offset = mm_target_info['dc_offset_freq']
+            shifted_frequency = mm_target_info['flux_pulse_freq']
+            bare_frequency = shifted_frequency-dc_offset
+            waveforms_qubit_flux = ap.sideband(ftpts,
+                                             ap.square(ftpts, pulse.amp, pulse_location-pulse.length-0.5*(pulse.span_length - pulse.length) , pulse.length, pulse_cfg['square'][
+                                                                          'ramp_sigma']), np.zeros(len(ftpts)),freq=bare_frequency, phase= 360*dc_offset/1e9*(ftpts+pulse_location)+pulse.phase,offset=False)[0]
+
+
+
+    else:
+        waveforms_qubit_flux = ap.sideband(ftpts,
+                                           ap.square(ftpts, pulse.amp, pulse_location-pulse.length-0.5*(pulse.span_length - pulse.length) , pulse.length, pulse_cfg['square'][
+                                                                      'ramp_sigma']), np.zeros(len(ftpts)),
+                                          pulse.freq, pulse.phase,offset=False)[0]
+
+
+    return waveforms_qubit_flux
+
+
 
 def flux_gauss(ftpts,pulse_location,pulse):
     waveforms_qubit_flux = ap.sideband(ftpts,

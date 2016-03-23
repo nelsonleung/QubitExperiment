@@ -10,6 +10,7 @@ from liveplot import LivePlotClient
 
 class RabiSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):
+        self.pulse_cfg = cfg['pulse_info']
         QubitPulseSequence.__init__(self,name, cfg, expt_cfg, self.define_points, self.define_parameters, self.define_pulses)
 
     def define_points(self):
@@ -22,7 +23,7 @@ class RabiSequence(QubitPulseSequence):
         if self.expt_cfg['sweep_amp']:
             self.psb.append('q','general', self.pulse_type, amp=pt, length=self.expt_cfg['length'],freq=self.expt_cfg['iq_freq'])
         else:
-            self.psb.append('q','general', self.pulse_type, amp=self.expt_cfg['a'], length=pt,freq=self.expt_cfg['iq_freq'])
+            self.psb.append('q','general', self.pulse_type, amp=self.pulse_cfg['gauss']['a'], length=pt,freq=self.expt_cfg['iq_freq'])
 
 
 
@@ -65,20 +66,17 @@ class SpinEchoSequence(QubitPulseSequence):
         self.half_pi_offset = self.pulse_cfg[self.pulse_type]['offset_phase']
 
     def define_pulses(self,pt):
+
         self.psb.append('q','half_pi', self.pulse_type)
         for i in arange(self.expt_cfg["number"]):
-            self.psb.idle(pt/(float(self.expt_cfg["number"]+1)))
-            self.psb.append('q','pi', self.pulse_type)
-        self.psb.idle(pt/(float(self.expt_cfg["number"]+1)))
+            self.psb.idle(pt/(float(2*self.expt_cfg["number"])))
+            if self.expt_cfg['CP']:
+                self.psb.append('q','pi', self.pulse_type)
+            elif self.expt_cfg['CPMG']:
+                self.psb.append('q','pi', self.pulse_type, phase=90)
+            self.psb.idle(pt/(float(2*self.expt_cfg["number"])))
         self.psb.append('q','half_pi', self.pulse_type, phase= self.half_pi_offset + 360.0*self.expt_cfg['ramsey_freq']*pt/(1.0e9))
 
-        # self.psb.append('q','half_pi', self.pulse_type)
-        # for i in arange(self.expt_cfg["number"]):
-        #     self.psb.idle(pt/(float(self.expt_cfg["number"]+1)))
-        #     self.psb.append('q','pi', self.pulse_type, phase=i*(-30))
-        # self.psb.idle(pt/(float(self.expt_cfg["number"]+1)))
-        # self.psb.append('q','half_pi', self.pulse_type, phase= self.half_pi_offset + self.expt_cfg["number"]*(-30)+ 360.0*self.expt_cfg['ramsey_freq']*pt/(1.0e9) )
-        #
 
 class EFRabiSequence(QubitPulseSequence):
     def __init__(self,name, cfg, expt_cfg,**kwargs):

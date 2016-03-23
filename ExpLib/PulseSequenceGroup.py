@@ -6,6 +6,7 @@ def cphase(psb,control_id ,minus_Z_id):
     psb.append('q,mm'+str(control_id),'pi_ge')
 
 
+
 # def cnot(psb,control_id ,minus_Z_id):
 #     psb.append('q,mm'+str(control_id),'pi_ge')
 #     psb.append('q,mm'+str(minus_Z_id),'pi_ef')

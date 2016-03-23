@@ -72,6 +72,14 @@ class PulseSequenceBuilder():
                 freq = self.pulse_cfg[type]['iq_freq']+self.qubit_cfg['alpha']
                 if phase == None:
                     phase = 0
+
+            if name == "half_pi_q_ef":
+                amp = self.pulse_cfg[type]['pi_ef_a']
+                length = self.pulse_cfg[type]['half_pi_ef_length']
+                freq = self.pulse_cfg[type]['iq_freq']+self.qubit_cfg['alpha']
+                if phase == None:
+                    phase = 0
+
             pulse_span_length = ap.get_pulse_span_length(self.pulse_cfg, type, length)
             if self.flux_pulse_started:
                 self.pulse_span_length_list_temp.append(pulse_span_length)
@@ -259,9 +267,13 @@ class PulseSequenceBuilder():
                         flux_pulse_started = True
                     mm_target = int(pulse.target[4])
                     mm_target_info = self.cfg['multimodes'][mm_target]
+                    flux_pulse_info = self.cfg['flux_pulse_info']
                     if pulse.type == "square":
-                        waveforms_qubit_flux = flux_square(self.ftpts, flux_pulse_location, pulse,
-                                                           self.cfg['flux_pulse_info'])
+                        # waveforms_qubit_flux = flux_square(self.ftpts, flux_pulse_location, pulse,
+                        #                                    self.cfg['flux_pulse_info'])
+
+                        waveforms_qubit_flux = flux_square_phase_fix(self.ftpts, flux_pulse_location, pulse,
+                                                           self.cfg['flux_pulse_info'],mm_target_info, flux_pulse_info)
                     elif pulse.type == "gauss":
                         waveforms_qubit_flux = flux_gauss(self.ftpts, flux_pulse_location, pulse)
                     else:
